@@ -50,3 +50,6 @@ skills-lock.json
 .claude/
 .windsurf/
 .agents/
+
+# local database
+*.db
