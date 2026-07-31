@@ -1,0 +1,494 @@
+{
+  "version": "1.0",
+  "description": "MBTI 人格测试题库 — 60题，生活化风格，中文版",
+  "totalQuestions": 60,
+  "scaleType": "二元选择（符合/不符合）",
+  "dimensions": {
+    "EI": { "description": "外向(E) vs 内向(I) — 精力来源", "count": 15 },
+    "SN": { "description": "感觉(S) vs 直觉(N) — 认知方式", "count": 15 },
+    "TF": { "description": "思考(T) vs 情感(F) — 决策方式", "count": 15 },
+    "JP": { "description": "判断(J) vs 感知(P) — 生活态度", "count": 15 }
+  },
+  "questions": [
+    {
+      "id": 1,
+      "text": "在聚会或饭局上，你通常会主动和不太熟悉的人聊天，而不是只和熟人待在一起",
+      "dimension": "E",
+      "direction": "forward",
+      "weight": 2,
+      "category": "社交行为"
+    },
+    {
+      "id": 2,
+      "text": "认识新朋友让你感到兴奋和期待",
+      "dimension": "E",
+      "direction": "forward",
+      "weight": 2,
+      "category": "社交行为"
+    },
+    {
+      "id": 3,
+      "text": "周末你更愿意和朋友一起出去玩，而不是一个人在家休息",
+      "dimension": "E",
+      "direction": "forward",
+      "weight": 1,
+      "category": "社交行为"
+    },
+    {
+      "id": 4,
+      "text": "在人群中待久了你的能量不减反增，越聊越精神",
+      "dimension": "E",
+      "direction": "forward",
+      "weight": 3,
+      "category": "生活规划"
+    },
+    {
+      "id": 5,
+      "text": "你有心事时会找朋友倾诉，而不是自己一个人消化",
+      "dimension": "E",
+      "direction": "forward",
+      "weight": 2,
+      "category": "信息处理"
+    },
+    {
+      "id": 6,
+      "text": "团队头脑风暴让你灵感迸发，比独自思考效果更好",
+      "dimension": "E",
+      "direction": "forward",
+      "weight": 2,
+      "category": "工作偏好"
+    },
+    {
+      "id": 7,
+      "text": "看到别人有困难时，你会直接上前帮忙而不是先观察情况",
+      "dimension": "E",
+      "direction": "forward",
+      "weight": 1,
+      "category": "社交行为"
+    },
+    {
+      "id": 8,
+      "text": "比起一群人热闹，你更享受和一两个好友的深入交流",
+      "dimension": "I",
+      "direction": "forward",
+      "weight": 2,
+      "category": "社交行为"
+    },
+    {
+      "id": 9,
+      "text": "即使是很愉快的社交活动之后，你也需要一段时间独处来恢复精力",
+      "dimension": "I",
+      "direction": "forward",
+      "weight": 3,
+      "category": "社交行为"
+    },
+    {
+      "id": 10,
+      "text": "发微信消息之前，你会在脑子里把要说的话过好几遍",
+      "dimension": "I",
+      "direction": "forward",
+      "weight": 1,
+      "category": "社交行为"
+    },
+    {
+      "id": 11,
+      "text": "在会议上你倾向于先听完所有人的观点，再发表自己的看法",
+      "dimension": "I",
+      "direction": "forward",
+      "weight": 2,
+      "category": "决策方式"
+    },
+    {
+      "id": 12,
+      "text": "你的微信好友数量不多，但和每个人的关系都很深",
+      "dimension": "I",
+      "direction": "forward",
+      "weight": 2,
+      "category": "社交行为"
+    },
+    {
+      "id": 13,
+      "text": "认识新朋友对你来说是一件消耗精力的事，而不是获取能量的事",
+      "dimension": "I",
+      "direction": "forward",
+      "weight": 2,
+      "category": "社交行为"
+    },
+    {
+      "id": 14,
+      "text": "遇到问题你更倾向于自己先摸索解决，而不是马上求助别人",
+      "dimension": "I",
+      "direction": "forward",
+      "weight": 1,
+      "category": "信息处理"
+    },
+    {
+      "id": 15,
+      "text": "你更习惯用文字表达自己，而不是当面交谈",
+      "dimension": "I",
+      "direction": "forward",
+      "weight": 1,
+      "category": "信息处理"
+    },
+    {
+      "id": 16,
+      "text": "做菜时你更依赖菜谱的精确步骤，而不是凭感觉随意调整",
+      "dimension": "S",
+      "direction": "forward",
+      "weight": 2,
+      "category": "信息处理"
+    },
+    {
+      "id": 17,
+      "text": "你更相信亲身经历过的事情，而不是别人总结出来的道理",
+      "dimension": "S",
+      "direction": "forward",
+      "weight": 2,
+      "category": "信息处理"
+    },
+    {
+      "id": 18,
+      "text": "讲一件事时，你习惯先从具体细节说起，最后再总结观点",
+      "dimension": "S",
+      "direction": "forward",
+      "weight": 1,
+      "category": "信息处理"
+    },
+    {
+      "id": 19,
+      "text": "学一样新东西时，你喜欢先看具体例子和操作演示，再看原理说明",
+      "dimension": "S",
+      "direction": "forward",
+      "weight": 2,
+      "category": "信息处理"
+    },
+    {
+      "id": 20,
+      "text": "你对身边环境的变化很敏感，比如光线、气味或温度的变化",
+      "dimension": "S",
+      "direction": "forward",
+      "weight": 1,
+      "category": "信息处理"
+    },
+    {
+      "id": 21,
+      "text": "旅行时你喜欢做足功课跟着攻略走，而不是到了目的地再随机探索",
+      "dimension": "S",
+      "direction": "forward",
+      "weight": 2,
+      "category": "生活规划"
+    },
+    {
+      "id": 22,
+      "text": "你认为经验比直觉更可靠，过去的实际结果最有说服力",
+      "dimension": "S",
+      "direction": "forward",
+      "weight": 3,
+      "category": "决策方式"
+    },
+    {
+      "id": 23,
+      "text": "买一个东西时，你更关心它实际好不好用，而不是它的设计理念和品牌故事",
+      "dimension": "S",
+      "direction": "forward",
+      "weight": 1,
+      "category": "决策方式"
+    },
+    {
+      "id": 24,
+      "text": "你在和人聊天时，经常会忽然联想到一个看似毫不相关的话题",
+      "dimension": "N",
+      "direction": "forward",
+      "weight": 2,
+      "category": "信息处理"
+    },
+    {
+      "id": 25,
+      "text": "比起眼前已经确定的事，你对未来的可能性和变化更感兴趣",
+      "dimension": "N",
+      "direction": "forward",
+      "weight": 2,
+      "category": "信息处理"
+    },
+    {
+      "id": 26,
+      "text": "你喜欢思考事物的「本质是什么」，而不是停留在「现在是什么样」",
+      "dimension": "N",
+      "direction": "forward",
+      "weight": 3,
+      "category": "信息处理"
+    },
+    {
+      "id": 27,
+      "text": "做决定时你更依赖一闪而过的直觉，而不是一步步仔细推理",
+      "dimension": "N",
+      "direction": "forward",
+      "weight": 2,
+      "category": "决策方式"
+    },
+    {
+      "id": 28,
+      "text": "你常常沉浸在自己的想象世界里，回过神来发现时间过了好久",
+      "dimension": "N",
+      "direction": "forward",
+      "weight": 2,
+      "category": "信息处理"
+    },
+    {
+      "id": 29,
+      "text": "你对新的概念和抽象的理论充满好奇，即使它们看起来没什么实际用处",
+      "dimension": "N",
+      "direction": "forward",
+      "weight": 2,
+      "category": "信息处理"
+    },
+    {
+      "id": 30,
+      "text": "比起按部就班用老方法，你更想试试自己做一套新方案出来",
+      "dimension": "N",
+      "direction": "forward",
+      "weight": 1,
+      "category": "工作偏好"
+    },
+    {
+      "id": 31,
+      "text": "做决定时你会先把个人喜好放一边，只看客观事实和逻辑",
+      "dimension": "T",
+      "direction": "forward",
+      "weight": 2,
+      "category": "决策方式"
+    },
+    {
+      "id": 32,
+      "text": "朋友找你倾诉烦恼时，你第一反应是帮忙分析问题，而不是先安抚情绪",
+      "dimension": "T",
+      "direction": "forward",
+      "weight": 2,
+      "category": "社交行为"
+    },
+    {
+      "id": 33,
+      "text": "你认为在重要的事情上，公平公正比人情世故更重要",
+      "dimension": "T",
+      "direction": "forward",
+      "weight": 3,
+      "category": "决策方式"
+    },
+    {
+      "id": 34,
+      "text": "在争论中，即使可能让对方不高兴，你也会坚持你认为事实正确的观点",
+      "dimension": "T",
+      "direction": "forward",
+      "weight": 2,
+      "category": "社交行为"
+    },
+    {
+      "id": 35,
+      "text": "你觉得大部分生活中的问题都可以通过理性分析找到答案",
+      "dimension": "T",
+      "direction": "forward",
+      "weight": 2,
+      "category": "决策方式"
+    },
+    {
+      "id": 36,
+      "text": "给别人提建议时，你喜欢直接指出问题所在，而不是先夸一顿再委婉地说",
+      "dimension": "T",
+      "direction": "forward",
+      "weight": 1,
+      "category": "工作偏好"
+    },
+    {
+      "id": 37,
+      "text": "看电影时你会在意剧情逻辑是否说得通，即使角色的情感很打动人",
+      "dimension": "T",
+      "direction": "forward",
+      "weight": 1,
+      "category": "信息处理"
+    },
+    {
+      "id": 38,
+      "text": "做重大决定时，你内心的感受和价值观往往比冷冰冰的数据更有分量",
+      "dimension": "F",
+      "direction": "forward",
+      "weight": 2,
+      "category": "决策方式"
+    },
+    {
+      "id": 39,
+      "text": "看到别人难过的时候，你很容易也被感染，跟着揪心",
+      "dimension": "F",
+      "direction": "forward",
+      "weight": 2,
+      "category": "社交行为"
+    },
+    {
+      "id": 40,
+      "text": "很多时候你宁愿自己受点委屈，也不想让别人感到难堪或失望",
+      "dimension": "F",
+      "direction": "forward",
+      "weight": 2,
+      "category": "社交行为"
+    },
+    {
+      "id": 41,
+      "text": "团队里的氛围和不和谐，比你能否高效完成任务更影响你的心情",
+      "dimension": "F",
+      "direction": "forward",
+      "weight": 2,
+      "category": "工作偏好"
+    },
+    {
+      "id": 42,
+      "text": "做一个选择的时候，你常常会想「这样做会不会伤到谁」",
+      "dimension": "F",
+      "direction": "forward",
+      "weight": 1,
+      "category": "决策方式"
+    },
+    {
+      "id": 43,
+      "text": "你觉得有时候善意的谎言比把残酷的真相直接说出来更好",
+      "dimension": "F",
+      "direction": "forward",
+      "weight": 2,
+      "category": "决策方式"
+    },
+    {
+      "id": 44,
+      "text": "你很容易被感人的故事、电影片段或一首歌触动到流泪",
+      "dimension": "F",
+      "direction": "forward",
+      "weight": 1,
+      "category": "信息处理"
+    },
+    {
+      "id": 45,
+      "text": "一个道理即使逻辑上无懈可击，如果违背了你内心坚持的价值观，你也很难接受",
+      "dimension": "F",
+      "direction": "forward",
+      "weight": 3,
+      "category": "决策方式"
+    },
+    {
+      "id": 46,
+      "text": "出门旅行之前，你会提前做好详细的行程规划和攻略",
+      "dimension": "J",
+      "direction": "forward",
+      "weight": 2,
+      "category": "生活规划"
+    },
+    {
+      "id": 47,
+      "text": "事情最好按计划来，突然的变动会让你感到不安或烦躁",
+      "dimension": "J",
+      "direction": "forward",
+      "weight": 2,
+      "category": "生活规划"
+    },
+    {
+      "id": 48,
+      "text": "你的电脑桌面和房间通常保持整洁有序，东西都有固定的位置",
+      "dimension": "J",
+      "direction": "forward",
+      "weight": 1,
+      "category": "生活规划"
+    },
+    {
+      "id": 49,
+      "text": "有截止日期的事情你通常会提前完成，而不是拖到最后冲刺",
+      "dimension": "J",
+      "direction": "forward",
+      "weight": 2,
+      "category": "工作偏好"
+    },
+    {
+      "id": 50,
+      "text": "面对重要决定时，你会列一个清单把利弊都写出来再权衡",
+      "dimension": "J",
+      "direction": "forward",
+      "weight": 2,
+      "category": "决策方式"
+    },
+    {
+      "id": 51,
+      "text": "你习惯用待办清单或提醒工具来管理日常事务，而不是靠脑子记",
+      "dimension": "J",
+      "direction": "forward",
+      "weight": 1,
+      "category": "生活规划"
+    },
+    {
+      "id": 52,
+      "text": "面对一件悬而未决的事情你会很不舒服，总想了结了它",
+      "dimension": "J",
+      "direction": "forward",
+      "weight": 3,
+      "category": "决策方式"
+    },
+    {
+      "id": 53,
+      "text": "假期里你更喜欢随遇而安，走到哪算哪，不喜欢被行程表绑住",
+      "dimension": "P",
+      "direction": "forward",
+      "weight": 2,
+      "category": "生活规划"
+    },
+    {
+      "id": 54,
+      "text": "你经常同时进行好几件事情，在它们之间来回切换",
+      "dimension": "P",
+      "direction": "forward",
+      "weight": 2,
+      "category": "工作偏好"
+    },
+    {
+      "id": 55,
+      "text": "说句实话，截止日期是你效率最高的时候",
+      "dimension": "P",
+      "direction": "forward",
+      "weight": 2,
+      "category": "工作偏好"
+    },
+    {
+      "id": 56,
+      "text": "你觉得把每件事都计划得太细反而会限制可能性，留点空间更好",
+      "dimension": "P",
+      "direction": "forward",
+      "weight": 1,
+      "category": "生活规划"
+    },
+    {
+      "id": 57,
+      "text": "你的生活态度更像是「先上车再说」，而不是「把所有路线研究清楚再出发」",
+      "dimension": "P",
+      "direction": "forward",
+      "weight": 3,
+      "category": "生活规划"
+    },
+    {
+      "id": 58,
+      "text": "面对多个选择的时候，你会尽量保持所有选项都开着，不急着定下来",
+      "dimension": "P",
+      "direction": "forward",
+      "weight": 2,
+      "category": "决策方式"
+    },
+    {
+      "id": 59,
+      "text": "突然改变原定计划对你来说不是什么大事，甚至会觉得多了点乐趣",
+      "dimension": "P",
+      "direction": "forward",
+      "weight": 1,
+      "category": "生活规划"
+    },
+    {
+      "id": 60,
+      "text": "比起每天按固定日程生活，你更喜欢根据当天的心情和状态灵活安排",
+      "dimension": "P",
+      "direction": "forward",
+      "weight": 1,
+      "category": "生活规划"
+    }
+  ]
+}
