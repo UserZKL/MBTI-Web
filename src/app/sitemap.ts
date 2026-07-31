@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next"
 import { getAllPersonalityTypes } from "@/lib/mbti-utils"
+import { getAllPosts } from "@/content/blog"
 
 const BASE = process.env.NEXT_PUBLIC_APP_URL ?? "https://mbti-test.example.com"
 
@@ -10,6 +11,14 @@ export default function sitemap(): MetadataRoute.Sitemap {
     lastModified: new Date(),
     changeFrequency: "monthly",
     priority: 0.7,
+  }))
+
+  const posts = getAllPosts()
+  const blogPages: MetadataRoute.Sitemap = posts.map((p) => ({
+    url: `${BASE}/blog/${p.slug}`,
+    lastModified: new Date(),
+    changeFrequency: "monthly",
+    priority: 0.6,
   }))
 
   return [
@@ -31,6 +40,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "weekly",
       priority: 0.8,
     },
+    {
+      url: `${BASE}/blog`,
+      lastModified: new Date(),
+      changeFrequency: "weekly",
+      priority: 0.8,
+    },
     ...typePages,
+    ...blogPages,
   ]
 }

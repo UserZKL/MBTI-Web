@@ -1,5 +1,6 @@
 "use client"
 
+import { useState, useRef, useEffect } from "react"
 import { useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { GradientText } from "@/components/shared/gradient-text"
@@ -10,20 +11,129 @@ import { ResultChart } from "@/components/shared/result-chart"
 import { TypeBadge } from "@/components/shared/type-badge"
 import { calculateResult, getPersonalityTypeData, type Answer } from "@/lib/mbti-utils"
 import { type MbtiResult } from "@/lib/mbti-utils"
-import { Share2, RefreshCw, Users, Briefcase, Heart, TrendingUp } from "lucide-react"
+import {
+  Share2, RefreshCw, Users, Briefcase, Heart, TrendingUp,
+  Sparkles, Loader2, FileJson
+} from "lucide-react"
 
 export function ResultPage() {
   const searchParams = useSearchParams()
   const dataParam = searchParams.get("data")
 
   let result: MbtiResult | null = null
+  let rawAnswers: Answer[] = []
   if (dataParam) {
     try {
-      const answers: Answer[] = JSON.parse(atob(dataParam))
-      result = calculateResult(answers)
+      rawAnswers = JSON.parse(atob(dataParam))
+      result = calculateResult(rawAnswers)
     } catch {
       // invalid data
     }
+  }
+
+  const [saveState, setSaveState] = useState<"idle" | "loading" | "saved" | "error">("idle")
+  const [reportState, setReportState] = useState<"idle" | "loading" | "done" | "error">("idle")
+  const [reportText, setReportText] = useState<string | null>(null)
+  const [showReport, setShowReport] = useState(false)
+  const autoSaved = useRef(false)
+  const rawAnswersRef = useRef(rawAnswers)
+  const resultRef = useRef(result)
+
+  // Sync refs with latest derived values (re-evaluated on dataParam change)
+  useEffect(() => {
+    rawAnswersRef.current = rawAnswers
+    resultRef.current = result
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dataParam])
+
+  const typeData = result ? getPersonalityTypeData(result.type) : null
+
+  const doSave = async (report?: string) => {
+    const r = resultRef.current
+    if (!r || saveState === "loading") return
+    setSaveState("loading")
+    try {
+      const body: Record<string, unknown> = {
+        typeCode: r.type,
+        scores: r.scores,
+        answers: rawAnswersRef.current,
+        isPublic: false,
+      }
+      if (report) body.report = report
+      const res = await fetch("/api/result/save", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      })
+      if (!res.ok) throw new Error("Save failed")
+      setSaveState("saved")
+    } catch {
+      setSaveState("error")
+    }
+  }
+
+  useEffect(() => {
+    if (resultRef.current && !autoSaved.current) {
+      autoSaved.current = true
+      doSave()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  const handleGenerateReport = async () => {
+    if (!result || reportState === "loading") return
+    setReportState("loading")
+    setShowReport(true)
+    try {
+      const res = await fetch("/api/report/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          typeCode: result.type,
+          typeData: typeData ? {
+            name: typeData.name,
+            description: typeData.description,
+            strengths: typeData.strengths,
+            weaknesses: typeData.weaknesses,
+            careers: typeData.careers,
+            relationships: typeData.relationships,
+            growth: typeData.growth,
+          } : undefined,
+          answers: rawAnswers.map((a) => ({ questionId: a.questionId, answer: a.answer })),
+          percentages: result.percentages,
+          confidence: result.confidence,
+        }),
+      })
+      if (!res.ok) throw new Error("Generation failed")
+      const data = await res.json()
+      setReportText(data.report)
+      setReportState("done")
+      if (saveState === "saved") {
+        doSave(data.report)
+      }
+    } catch {
+      setReportState("error")
+    }
+  }
+
+  const handleDownloadJson = () => {
+    if (!result) return
+    const payload = {
+      type: result.type,
+      typeName: result.typeName,
+      scores: result.scores,
+      percentages: result.percentages,
+      confidence: result.confidence,
+      dimensions: result.dimensions,
+      ...(reportText ? { report: reportText } : {}),
+    }
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement("a")
+    a.href = url
+    a.download = `mbti-result-${result.type}-${Date.now()}.json`
+    a.click()
+    URL.revokeObjectURL(url)
   }
 
   if (!result) {
@@ -37,13 +147,11 @@ export function ResultPage() {
     )
   }
 
-  const typeData = getPersonalityTypeData(result.type)
   const confidenceLabel =
     result.confidence >= 70 ? "高度确定" : result.confidence >= 40 ? "比较确定" : "边缘型"
 
   return (
     <div className="relative min-h-screen overflow-x-clip pb-24">
-      {/* Background */}
       <div className="pointer-events-none fixed inset-0 -z-10">
         <div className="absolute -top-20 right-0 h-[500px] w-[500px] rounded-full bg-[var(--color-brand-purple)]/3 blur-[120px]" />
         <div className="absolute bottom-0 left-0 h-[400px] w-[400px] rounded-full bg-[var(--color-brand-cyan)]/3 blur-[100px]" />
@@ -61,6 +169,7 @@ export function ResultPage() {
           </p>
           <p className="mt-3 text-xs text-[var(--color-text-tertiary)]">
             置信度：{result.confidence}% · {confidenceLabel}
+            {saveState === "saved" && <span className="ml-2 text-[var(--color-success)]">· 已保存</span>}
           </p>
         </section>
 
@@ -195,8 +304,60 @@ export function ResultPage() {
           </section>
         )}
 
+        {/* AI Report Section */}
+        <section className="mb-10">
+          <div className="mb-5 flex items-center gap-2">
+            <Sparkles className="size-4 text-[var(--color-brand-cyan)]" />
+            <h2 className="text-lg font-semibold text-[var(--color-text-primary)]">AI 深度分析</h2>
+          </div>
+
+          {!showReport ? (
+            <GlassCard variant="subtle" className="p-8 text-center">
+              <Sparkles className="mx-auto mb-3 size-8 text-[var(--color-brand-purple)]" />
+              <p className="mb-4 text-sm text-[var(--color-text-secondary)]">
+                基于你的测试结果，AI 将生成一份专属的深度分析报告
+              </p>
+              <GradientButton
+                onClick={handleGenerateReport}
+                disabled={reportState === "loading"}
+                className="flex items-center gap-2"
+                glow
+              >
+                <Sparkles className="size-4" />
+                生成 AI 报告
+              </GradientButton>
+            </GlassCard>
+          ) : reportState === "loading" ? (
+            <GlassCard variant="subtle" className="flex flex-col items-center p-12 text-center">
+              <Loader2 className="mb-3 size-8 animate-spin text-[var(--color-brand-purple)]" />
+              <p className="text-sm text-[var(--color-text-secondary)]">AI 正在分析你的测试数据...</p>
+              <p className="mt-1 text-xs text-[var(--color-text-tertiary)]">这可能需要 10-20 秒</p>
+            </GlassCard>
+          ) : reportState === "error" ? (
+            <GlassCard variant="subtle" className="p-8 text-center">
+              <p className="mb-3 text-sm text-[var(--color-text-secondary)]">报告生成失败，请重试</p>
+              <GradientButton
+                variant="outline"
+                onClick={handleGenerateReport}
+                className="flex items-center gap-2"
+              >
+                <RefreshCw className="size-4" />
+                重试
+              </GradientButton>
+            </GlassCard>
+          ) : reportText ? (
+            <GlassCard variant="subtle" className="prose-p:!my-0 p-6 text-sm leading-relaxed text-[var(--color-text-secondary)]">
+              {reportText.split("\n").map((line, i) => (
+                <p key={i} className="mb-3 last:mb-0">
+                  {line || "\u00A0"}
+                </p>
+              ))}
+            </GlassCard>
+          ) : null}
+        </section>
+
         {/* Action Buttons */}
-        <section className="flex flex-col items-center gap-3 pb-10 sm:flex-row sm:justify-center">
+        <section className="flex flex-col items-center gap-3 pb-10 sm:flex-row sm:justify-center sm:flex-wrap">
           <GradientLink
             href="/types"
             className="bg-white/[0.02] text-[var(--color-text-secondary)]"
@@ -215,8 +376,17 @@ export function ResultPage() {
             <Share2 className="size-4" />
             分享结果
           </GradientLink>
+          <GradientButton
+            variant="outline"
+            onClick={handleDownloadJson}
+            className="flex items-center gap-2"
+          >
+            <FileJson className="size-4" />
+            下载 JSON
+          </GradientButton>
         </section>
       </div>
+
     </div>
   )
 }

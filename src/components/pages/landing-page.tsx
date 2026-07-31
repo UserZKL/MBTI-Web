@@ -153,6 +153,17 @@ export function LandingPage() {
 
       {/* Footer */}
       <footer className="border-t border-white/[0.04] py-8 text-center">
+        <div className="mb-2 flex items-center justify-center gap-4">
+          <Link href="/blog" className="text-xs text-[var(--color-text-tertiary)] transition-colors hover:text-[var(--color-text-secondary)]">
+            MBTI 博客
+          </Link>
+          <Link href="/compare" className="text-xs text-[var(--color-text-tertiary)] transition-colors hover:text-[var(--color-text-secondary)]">
+            对比类型
+          </Link>
+          <Link href="/stats" className="text-xs text-[var(--color-text-tertiary)] transition-colors hover:text-[var(--color-text-secondary)]">
+            统计数据
+          </Link>
+        </div>
         <p className="text-xs text-[var(--color-text-tertiary)]">
           MBTI 人格测试 · 开源免费 · 数据安全 · 无需注册
         </p>

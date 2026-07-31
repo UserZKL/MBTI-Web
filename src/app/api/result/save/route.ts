@@ -15,6 +15,7 @@ const saveResultSchema = z.object({
     })
   ),
   isPublic: z.boolean().optional().default(false),
+  report: z.string().optional(),
 })
 
 export async function POST(request: NextRequest) {
@@ -32,18 +33,21 @@ export async function POST(request: NextRequest) {
     const session = await auth()
     const userId = session?.user?.id ?? "anonymous"
 
-    const { typeCode, scores, answers, isPublic } = parsed.data
+    const { typeCode, scores, answers, isPublic, report } = parsed.data
     const db = (await prisma()) as { result: { create: (args: { data: Record<string, unknown> }) => Promise<{ id: string; createdAt: Date }> } }
 
-    const result = await db.result.create({
-      data: {
-        userId,
-        typeCode,
-        scores: JSON.parse(JSON.stringify(scores)),
-        answers: JSON.parse(JSON.stringify(answers)),
-        isPublic,
-      },
-    })
+    const data: Record<string, unknown> = {
+      userId,
+      typeCode,
+      scores: JSON.parse(JSON.stringify(scores)),
+      answers: JSON.parse(JSON.stringify(answers)),
+      isPublic,
+    }
+    if (report) {
+      data.report = report
+    }
+
+    const result = await db.result.create({ data })
 
     return NextResponse.json({ id: result.id, createdAt: result.createdAt }, { status: 201 })
   } catch (error) {
