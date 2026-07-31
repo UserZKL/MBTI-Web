@@ -1,10 +1,14 @@
 import { NextRequest, NextResponse } from "next/server"
+import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 
 export const dynamic = "force-dynamic"
 
 export async function GET(request: NextRequest) {
   try {
+    const session = await auth()
+    const userId = session?.user?.id ?? "anonymous"
+
     const { searchParams } = new URL(request.url)
     const limit = Math.min(Number(searchParams.get("limit")) || 20, 100)
     const offset = Math.max(Number(searchParams.get("offset")) || 0, 0)
@@ -16,7 +20,7 @@ export async function GET(request: NextRequest) {
     }
 
     const results = await db.result.findMany({
-      where: { userId: "anonymous" },
+      where: { userId },
       orderBy: { createdAt: "desc" },
       take: limit,
       skip: offset,
@@ -29,7 +33,7 @@ export async function GET(request: NextRequest) {
     })
 
     const total = await db.result.count({
-      where: { userId: "anonymous" },
+      where: { userId },
     })
 
     return NextResponse.json({ results, total, limit, offset })

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { z } from "zod"
+import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 
 export const dynamic = "force-dynamic"
@@ -28,12 +29,15 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    const session = await auth()
+    const userId = session?.user?.id ?? "anonymous"
+
     const { typeCode, scores, answers, isPublic } = parsed.data
     const db = (await prisma()) as { result: { create: (args: { data: Record<string, unknown> }) => Promise<{ id: string; createdAt: Date }> } }
 
     const result = await db.result.create({
       data: {
-        userId: "anonymous",
+        userId,
         typeCode,
         scores: JSON.parse(JSON.stringify(scores)),
         answers: JSON.parse(JSON.stringify(answers)),

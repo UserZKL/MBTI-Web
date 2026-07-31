@@ -1,5 +1,12 @@
-import { ProfilePage } from "@/components/pages/profile-page"
+import { auth } from "@/lib/auth"
+import { ProfileClient } from "./profile-client"
 
-export default function ProfileRoute() {
-  return <ProfilePage />
+export default async function ProfileRoute() {
+  const session = await auth()
+
+  return (
+    <ProfileClient
+      user={session?.user ?? null}
+    />
+  )
 }

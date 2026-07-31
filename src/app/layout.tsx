@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono, Noto_Serif_SC, Noto_Sans_SC } from "next/font/google";
+import { SessionProvider } from "next-auth/react";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -75,7 +76,9 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} ${notoSerifSC.variable} ${notoSansSC.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-paper-2 text-text-primary font-sans">
-        <main>{children}</main>
+        <SessionProvider>
+          <main>{children}</main>
+        </SessionProvider>
       </body>
     </html>
   );

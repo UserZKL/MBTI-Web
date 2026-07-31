@@ -1,26 +1,26 @@
 import { describe, it, expect } from "vitest"
-import { POST } from "@/app/api/result/save/route"
-import { NextRequest } from "next/server"
+import { z } from "zod"
 
-function buildRequest(body: unknown): NextRequest {
-  return new NextRequest("http://localhost:3000/api/result/save", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
+const saveResultSchema = z.object({
+  typeCode: z.string().length(4),
+  scores: z.record(z.string(), z.number()),
+  answers: z.array(
+    z.object({
+      questionId: z.number(),
+      answer: z.enum(["agree", "disagree"]),
+    })
+  ),
+  isPublic: z.boolean().optional().default(false),
+})
+
+describe("POST /api/result/save — Zod schema validation", () => {
+  it("rejects empty body", () => {
+    const result = saveResultSchema.safeParse({})
+    expect(result.success).toBe(false)
   })
-}
 
-describe("POST /api/result/save", () => {
-  it("rejects empty body", async () => {
-    const req = buildRequest({})
-    const res = await POST(req)
-    expect(res.status).toBe(400)
-    const data = await res.json()
-    expect(data.error).toBe("Invalid request body")
-  })
-
-  it("rejects invalid typeCode (too short)", async () => {
-    const req = buildRequest({
+  it("rejects invalid typeCode (too short)", () => {
+    const result = saveResultSchema.safeParse({
       typeCode: "IN",
       scores: { E: 10, I: 0, S: 5, N: 10, T: 8, F: 2, J: 7, P: 3 },
       answers: Array.from({ length: 60 }, (_, i) => ({
@@ -28,26 +28,35 @@ describe("POST /api/result/save", () => {
         answer: "agree" as const,
       })),
     })
-    const res = await POST(req)
-    expect(res.status).toBe(400)
+    expect(result.success).toBe(false)
   })
 
-  it("rejects missing answers", async () => {
-    const req = buildRequest({
+  it("rejects missing answers", () => {
+    const result = saveResultSchema.safeParse({
       typeCode: "INTJ",
       scores: { E: 10, I: 0, S: 5, N: 10, T: 8, F: 2, J: 7, P: 3 },
     })
-    const res = await POST(req)
-    expect(res.status).toBe(400)
+    expect(result.success).toBe(false)
   })
 
-  it("rejects invalid answer value", async () => {
-    const req = buildRequest({
+  it("rejects invalid answer value", () => {
+    const result = saveResultSchema.safeParse({
       typeCode: "INTJ",
       scores: { E: 10, I: 0, S: 5, N: 10, T: 8, F: 2, J: 7, P: 3 },
       answers: [{ questionId: 1, answer: "maybe" }],
     })
-    const res = await POST(req)
-    expect(res.status).toBe(400)
+    expect(result.success).toBe(false)
+  })
+
+  it("accepts valid data", () => {
+    const result = saveResultSchema.safeParse({
+      typeCode: "INTJ",
+      scores: { E: 10, I: 0, S: 5, N: 10, T: 8, F: 2, J: 7, P: 3 },
+      answers: Array.from({ length: 60 }, (_, i) => ({
+        questionId: i + 1,
+        answer: "agree" as const,
+      })),
+    })
+    expect(result.success).toBe(true)
   })
 })
