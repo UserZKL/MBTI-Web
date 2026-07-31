@@ -1,22 +1,20 @@
-# Phase 2 Report — UI Design
+# Phase 3 Report — Frontend Development
 
 **Date:** 2026-07-31  
 **Status:** COMPLETE  
-**Continue Permission:** YES
+**Continue Permission:** YES (Lighthouse 需手动验证)
 
 ## Deliverables
 
-| Category | Item | Status |
-|----------|------|--------|
-| Design doc | `docs/DESIGN.md` — luxury dark gradient design system | ✅ |
-| shadcn/ui | init v4.16.0, baseColor neutral, 8 components | ✅ |
-| Tokens | `globals.css` — shadcn v4 vars + custom luxury tokens + utilities | ✅ |
-| Fonts | Noto Serif SC (display) + Noto Sans SC (body) + Geist (fallback) | ✅ |
-| Layout | `layout.tsx` — lang=zh-CN, metadata, font variables | ✅ |
-| Shared | GradientText, GlassCard, GradientButton/GradientLink, ProgressBar, TypeBadge, DimensionBar | ✅ |
-| Pages | Landing, Test, Result, Share, AllTypes, TypeDetail, Login, Profile | ✅ |
-| Routes | /, /test, /result, /share/[slug], /types, /types/[code], /login, /profile | ✅ |
-| Theme | Dark luxury (#0a0a12 paper), purple→blue→cyan gradient, amber→rose accent, gold highlights | ✅ |
+| Task | Description | Status |
+|------|-------------|--------|
+| 1. Fix Bugs | progress-bar 除零防护+aria, dimension-bar 判空防护, test-page max修正 | ✅ |
+| 2. ResultChart | 纯 SVG 雷达图, 4轴, 渐变填充, 集成到 result-page | ✅ |
+| 3. SEO | viewport, favicon, metadataBase, loading/error/not-found/robots/sitemap, generateMetadata | ✅ |
+| 4. A11y | focus-visible 全局样式, aria-labels, heading 层级修复, main 地标, ul/li 语义化 | ✅ |
+| 5. Responsive | sessionStorage 状态恢复, URL 异常降级, overflow-x-clip 全页覆盖 | ✅ |
+| 6. Tests | 57 测试 (原36 + 新增21边界), 覆盖空值/零值/无效输入/权重/百分比/置信度边界 | ✅ |
+| 7. Lighthouse | 需用户手动 `next start` + Chrome DevTools 验证 | ⏳ |
 
 ## Verification
 
@@ -24,25 +22,24 @@
 |-------|--------|
 | typecheck | ✅ |
 | lint | ✅ (0 errors) |
-| test | ✅ 36/36 |
-| build | ✅ (webpack) |
+| test | ✅ 57/57 |
+| build | ✅ (webpack, 26 routes: 8 static + 3 dynamic + 16 SSG pages) |
 
-## Routes
+## New Routes (SEO)
 
-| Route | Render |
-|-------|--------|
-| `/` | Static |
-| `/test` | Static |
-| `/result` | Dynamic |
-| `/share/[slug]` | Dynamic |
-| `/types` | Static |
-| `/types/[code]` | Dynamic |
-| `/login` | Static |
-| `/profile` | Static |
+| Route | Type |
+|-------|------|
+| `/robots.txt` | Static |
+| `/sitemap.xml` | Static |
+| `/types/INTJ`..`ESFP` | SSG (16 prerendered) |
 
-## Notes
+## Lighthouse Target
 
-- SWC native bindings unavailable on this Windows machine; WASM fallback used automatically
-- `GradientLink` component created to replace `GradientButton asChild` pattern
-- Result page uses `dynamic = "force-dynamic"` for `useSearchParams()` support
-- npm audit: 12 high (tracked, not blocking)
+| Metric | Target | Status |
+|--------|--------|--------|
+| Performance | ≥ 90 | ⏳ |
+| Accessibility | ≥ 90 | ⏳ |
+| Best Practices | ≥ 90 | ⏳ |
+| SEO | ≥ 90 | ⏳ |
+
+Run: `npx next start` → Chrome DevTools → Lighthouse → Desktop
