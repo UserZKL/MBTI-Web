@@ -6,6 +6,7 @@ import { GradientText } from "@/components/shared/gradient-text"
 import { GradientButton, GradientLink } from "@/components/shared/gradient-button"
 import { GlassCard } from "@/components/shared/glass-card"
 import { DimensionBar } from "@/components/shared/dimension-bar"
+import { ResultChart } from "@/components/shared/result-chart"
 import { TypeBadge } from "@/components/shared/type-badge"
 import { calculateResult, getPersonalityTypeData, type Answer } from "@/lib/mbti-utils"
 import { type MbtiResult } from "@/lib/mbti-utils"
@@ -68,14 +69,32 @@ export function ResultPage() {
           <h2 className="mb-5 text-lg font-semibold text-[var(--color-text-primary)]">
             维度得分
           </h2>
-          <GlassCard variant="default" className="space-y-6 p-6">
-            {result.dimensions.map((dim) => (
-              <DimensionBar
-                key={dim.code}
-                left={{ label: dim.left.dimension, value: dim.left.score, percentage: dim.left.percentage }}
-                right={{ label: dim.right.dimension, value: dim.right.score, percentage: dim.right.percentage }}
-              />
-            ))}
+          <GlassCard variant="default" className="p-6">
+            <ResultChart
+              dimensions={result.dimensions.map((dim) => ({
+                code: dim.code,
+                left: { label: dim.left.dimension, percentage: dim.left.percentage },
+                right: { label: dim.right.dimension, percentage: dim.right.percentage },
+              }))}
+              className="mb-6"
+            />
+            <div className="space-y-4 border-t border-white/[0.06] pt-5">
+              {result.dimensions.map((dim) => (
+                <DimensionBar
+                  key={dim.code}
+                  left={{
+                    label: dim.left.dimension,
+                    value: dim.left.score,
+                    percentage: dim.left.percentage,
+                  }}
+                  right={{
+                    label: dim.right.dimension,
+                    value: dim.right.score,
+                    percentage: dim.right.percentage,
+                  }}
+                />
+              ))}
+            </div>
           </GlassCard>
         </section>
 

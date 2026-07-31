@@ -58,9 +58,9 @@ export function TypeDetailPage({ code }: TypeDetailPageProps) {
         {t.traits.cognitiveFunctions && t.traits.cognitiveFunctions.length > 0 && (
           <section className="mb-10">
             <GlassCard variant="subtle" className="p-6">
-              <h3 className="mb-4 text-sm font-semibold text-[var(--color-text-primary)]">
+              <h2 className="mb-4 text-sm font-semibold text-[var(--color-text-primary)]">
                 认知功能
-              </h3>
+              </h2>
               <div className="flex flex-wrap gap-2">
                 {t.traits.cognitiveFunctions.map((cf: string) => (
                   <span
@@ -80,7 +80,7 @@ export function TypeDetailPage({ code }: TypeDetailPageProps) {
           <GlassCard variant="subtle" className="p-5">
             <div className="mb-3 flex items-center gap-2">
               <TrendingUp className="size-4 text-[var(--color-success)]" />
-              <h3 className="text-sm font-semibold text-[var(--color-text-primary)]">优势</h3>
+              <h2 className="text-sm font-semibold text-[var(--color-text-primary)]">优势</h2>
             </div>
             <ul className="space-y-1.5">
               {typeData.strengths.map((s) => (
@@ -94,7 +94,7 @@ export function TypeDetailPage({ code }: TypeDetailPageProps) {
           <GlassCard variant="subtle" className="p-5">
             <div className="mb-3 flex items-center gap-2">
               <span className="text-xs">⚠</span>
-              <h3 className="text-sm font-semibold text-[var(--color-text-primary)]">待成长</h3>
+              <h2 className="text-sm font-semibold text-[var(--color-text-primary)]">待成长</h2>
             </div>
             <ul className="space-y-1.5">
               {typeData.weaknesses.map((s) => (

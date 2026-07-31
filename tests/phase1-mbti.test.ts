@@ -3,8 +3,12 @@ import {
   calculateScores,
   calculateResult,
   determineType,
+  calculatePercentages,
+  calculateConfidence,
   getQuestions,
   getQuestionCount,
+  getQuestionById,
+  getPersonalityTypeData,
   validateAnswers,
   getAllPersonalityTypes,
   type Dimension,
@@ -211,6 +215,172 @@ describe('personality types data', () => {
     const types = getAllPersonalityTypes()
     const codes = types.map((t) => t.code)
     expect(new Set(codes).size).toBe(codes.length)
+  })
+})
+
+describe('boundary tests', () => {
+  describe('calculateScores', () => {
+    it('should handle empty answers array', () => {
+      const scores = calculateScores([])
+      expect(scores.E).toBe(0)
+      expect(scores.I).toBe(0)
+      expect(scores.S).toBe(0)
+      expect(scores.N).toBe(0)
+      expect(scores.T).toBe(0)
+      expect(scores.F).toBe(0)
+      expect(scores.J).toBe(0)
+      expect(scores.P).toBe(0)
+    })
+
+    it('should skip unknown question IDs gracefully', () => {
+      const answers: Answer[] = [{ questionId: 999, answer: 'agree' }]
+      const scores = calculateScores(answers)
+      expect(scores.E).toBe(0)
+      expect(scores.I).toBe(0)
+    })
+
+    it('should handle answers with zero-weight questions', () => {
+      const answers: Answer[] = [{ questionId: 1, answer: 'agree' }]
+      // q1 has weight 2, verify scoring still works
+      const scores = calculateScores(answers)
+      expect(scores.E).toBe(2)
+    })
+
+    it('should handle reverse-scored answers', () => {
+      // mock: the code has reverse logic, test it directly if reachable
+      // All real questions are forward, but the function handles reverse
+      const scores = calculateScores([{ questionId: 1, answer: 'disagree' }])
+      expect(scores.I).toBe(2) // disagree on forward E → I gets score
+    })
+
+    it('should handle duplicate questionIds by double-counting', () => {
+      const answers: Answer[] = [
+        { questionId: 1, answer: 'agree' },
+        { questionId: 1, answer: 'agree' },
+      ]
+      const scores = calculateScores(answers)
+      expect(scores.E).toBe(4) // weight 2 × 2 = 4
+    })
+  })
+
+  describe('determineType', () => {
+    it('should use tie-breaker (>= favors left dimension)', () => {
+      const scores = { E: 0, I: 0, S: 0, N: 0, T: 0, F: 0, J: 0, P: 0 }
+      expect(determineType(scores)).toBe('ESTJ')
+    })
+
+    it('should handle tied scores in one dimension', () => {
+      const scores = { E: 5, I: 5, S: 10, N: 0, T: 0, F: 10, J: 8, P: 0 }
+      expect(determineType(scores)).toBe('ESFJ')
+    })
+  })
+
+  describe('calculatePercentages', () => {
+    it('should return 50/50 for all-zero totals', () => {
+      const scores = { E: 0, I: 0, S: 0, N: 0, T: 0, F: 0, J: 0, P: 0 }
+      const pcts = calculatePercentages(scores)
+      expect(pcts.E).toBe(50)
+      expect(pcts.I).toBe(50)
+    })
+
+    it('should return 100/0 for one-sided dominance', () => {
+      const scores = { E: 10, I: 0, S: 5, N: 0, T: 0, F: 5, J: 3, P: 0 }
+      const pcts = calculatePercentages(scores)
+      expect(pcts.E).toBe(100)
+      expect(pcts.I).toBe(0)
+    })
+  })
+
+  describe('calculateConfidence', () => {
+    it('should return 0 for all-zero scores', () => {
+      const scores = { E: 0, I: 0, S: 0, N: 0, T: 0, F: 0, J: 0, P: 0 }
+      expect(calculateConfidence(scores)).toBe(0)
+    })
+
+    it('should return 0 for perfectly balanced pairs', () => {
+      const scores = { E: 5, I: 5, S: 5, N: 5, T: 5, F: 5, J: 5, P: 5 }
+      expect(calculateConfidence(scores)).toBe(0)
+    })
+
+    it('should return value between 0 and 100', () => {
+      const answers = createAnswersForType('I', 'N', 'T', 'J')
+      const scores = calculateScores(answers)
+      const conf = calculateConfidence(scores)
+      expect(conf).toBeGreaterThanOrEqual(0)
+      expect(conf).toBeLessThanOrEqual(100)
+    })
+  })
+
+  describe('calculateResult', () => {
+    it('should return null for empty answers', () => {
+      expect(calculateResult([])).toBeNull()
+    })
+
+    it('should return result with typeName even for valid type', () => {
+      const answers = createAnswersForType('E', 'S', 'T', 'J')
+      const result = calculateResult(answers)
+      expect(result).not.toBeNull()
+      expect(result!.type).toBe('ESTJ')
+      expect(result!.typeName).toBeTruthy()
+      expect(result!.confidence).toBeGreaterThanOrEqual(0)
+      expect(result!.confidence).toBeLessThanOrEqual(100)
+    })
+  })
+
+  describe('validateAnswers', () => {
+    it('should reject answers with invalid values', () => {
+      const answers = createAnswersForType('E', 'S', 'T', 'J')
+      answers[0] = { questionId: 1, answer: 'foo' as 'agree' }
+      const result = validateAnswers(answers)
+      expect(result.valid).toBe(false)
+      expect(result.error).toBeTruthy()
+    })
+
+    it('should reject answers with 59 items', () => {
+      const answers = createAnswersForType('E', 'S', 'T', 'J').slice(0, 59)
+      const result = validateAnswers(answers)
+      expect(result.valid).toBe(false)
+    })
+
+    it('should accept answers with non-existent but valid ID count', () => {
+      const answers: Answer[] = Array.from({ length: 60 }, (_, i) => ({
+        questionId: i + 1,
+        answer: 'agree' as const,
+      }))
+      // IDs 1-60 with same answer, all real question IDs
+      const result = validateAnswers(answers)
+      expect(result.valid).toBe(true)
+    })
+  })
+
+  describe('getQuestionById', () => {
+    it('should return question for valid ID', () => {
+      const q = getQuestionById(1)
+      expect(q).toBeDefined()
+      expect(q!.id).toBe(1)
+      expect(q!.text).toBeTruthy()
+    })
+
+    it('should return undefined for invalid ID', () => {
+      expect(getQuestionById(0)).toBeUndefined()
+      expect(getQuestionById(999)).toBeUndefined()
+      expect(getQuestionById(-1)).toBeUndefined()
+    })
+  })
+
+  describe('getPersonalityTypeData', () => {
+    it('should return data for valid type code', () => {
+      const data = getPersonalityTypeData('INTJ')
+      expect(data).toBeDefined()
+      expect(data!.code).toBe('INTJ')
+      expect(data!.name).toBeTruthy()
+    })
+
+    it('should return undefined for invalid type code', () => {
+      expect(getPersonalityTypeData('XXXX')).toBeUndefined()
+      expect(getPersonalityTypeData('')).toBeUndefined()
+      expect(getPersonalityTypeData('intj')).toBeUndefined() // case-sensitive
+    })
   })
 })
 

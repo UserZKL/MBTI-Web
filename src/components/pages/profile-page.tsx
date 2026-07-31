@@ -31,16 +31,18 @@ export function ProfilePage() {
             <Button
               variant="ghost"
               size="sm"
+              aria-label="设置"
               className="border border-white/8 bg-white/[0.02] text-[var(--color-text-secondary)]"
             >
-              <Settings className="size-3.5" />
+              <Settings className="size-3.5" aria-hidden="true" />
             </Button>
             <Button
               variant="ghost"
               size="sm"
+              aria-label="退出登录"
               className="border border-white/8 bg-white/[0.02] text-[var(--color-text-tertiary)]"
             >
-              <LogOut className="size-3.5" />
+              <LogOut className="size-3.5" aria-hidden="true" />
             </Button>
           </div>
         </div>
@@ -68,20 +70,22 @@ export function ProfilePage() {
             <h2 className="text-base font-semibold text-[var(--color-text-primary)]">测试记录</h2>
           </div>
 
-          <div className="space-y-2">
+          <ul className="space-y-2">
             {MOCK_HISTORY.map((entry, i) => (
-              <GlassCard key={i} variant="subtle" hover className="flex items-center justify-between p-4">
-                <div className="flex items-center gap-3">
-                  <TypeBadge type={entry.type} size="sm" />
-                  <div>
-                    <p className="text-sm text-[var(--color-text-primary)]">{entry.typeName}</p>
-                    <p className="text-[10px] text-[var(--color-text-tertiary)]">{entry.date}</p>
+              <li key={i}>
+                <GlassCard variant="subtle" hover className="flex items-center justify-between p-4">
+                  <div className="flex items-center gap-3">
+                    <TypeBadge type={entry.type} size="sm" />
+                    <div>
+                      <p className="text-sm text-[var(--color-text-primary)]">{entry.typeName}</p>
+                      <p className="text-[10px] text-[var(--color-text-tertiary)]">{entry.date}</p>
+                    </div>
                   </div>
-                </div>
-                <ChevronRight className="size-4 text-[var(--color-text-tertiary)]" />
-              </GlassCard>
+                  <ChevronRight className="size-4 text-[var(--color-text-tertiary)]" aria-hidden="true" />
+                </GlassCard>
+              </li>
             ))}
-          </div>
+          </ul>
         </section>
 
         {/* Stats */}

@@ -19,7 +19,11 @@ export function ProgressBar({
   variant = "primary",
   className,
 }: ProgressBarProps) {
-  const percentage = Math.round((value / max) * 100)
+  const safeMax = max > 0 ? max : 1
+  const safeValue = Number.isFinite(value) ? value : 0
+  const percentage = Math.round(
+    Math.min(Math.max((safeValue / safeMax) * 100, 0), 100)
+  )
   const labelText = label ?? `${percentage}%`
 
   const heights = { sm: "h-1.5", md: "h-2.5", lg: "h-4" }
@@ -44,9 +48,10 @@ export function ProgressBar({
           heights[size]
         )}
         role="progressbar"
-        aria-valuenow={value}
+        aria-valuenow={safeValue}
         aria-valuemin={0}
-        aria-valuemax={max}
+        aria-valuemax={safeMax}
+        aria-valuetext={labelText}
       >
         <div
           className={cn(

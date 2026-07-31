@@ -8,12 +8,61 @@ import { Button } from "@/components/ui/button"
 import { getQuestions, type Answer, type Question } from "@/lib/mbti-utils"
 import { ChevronLeft } from "lucide-react"
 
+const STORAGE_KEY = "mbti-test-state"
+
+function saveState(currentIndex: number, answers: Answer[]) {
+  try {
+    sessionStorage.setItem(STORAGE_KEY, JSON.stringify({ currentIndex, answers }))
+  } catch {
+    // sessionStorage unavailable
+  }
+}
+
+function loadState(): { currentIndex: number; answers: Answer[] } | null {
+  try {
+    const raw = sessionStorage.getItem(STORAGE_KEY)
+    if (!raw) return null
+    return JSON.parse(raw)
+  } catch {
+    return null
+  }
+}
+
+function clearState() {
+  try {
+    sessionStorage.removeItem(STORAGE_KEY)
+  } catch {
+    // ignore
+  }
+}
+
 export function TestPage() {
   const router = useRouter()
   const questions = getQuestions()
   const [currentIndex, setCurrentIndex] = useState(0)
   const [answers, setAnswers] = useState<Answer[]>([])
   const [isTransitioning, setIsTransitioning] = useState(false)
+  const [showResume, setShowResume] = useState(() => {
+    const existing = loadState()
+    return !!(existing && existing.answers.length > 0 && existing.answers.length < questions.length)
+  })
+  const [savedState] = useState<{ currentIndex: number; answers: Answer[] } | null>(() => {
+    const existing = loadState()
+    return (existing && existing.answers.length > 0 && existing.answers.length < questions.length) ? existing : null
+  })
+
+  function handleResume() {
+    if (savedState) {
+      setCurrentIndex(savedState.currentIndex)
+      setAnswers(savedState.answers)
+    }
+    setShowResume(false)
+  }
+
+  function handleReset() {
+    clearState()
+    setShowResume(false)
+  }
 
   const currentQuestion: Question = questions[currentIndex]
 
@@ -25,10 +74,13 @@ export function TestPage() {
 
     setTimeout(() => {
       if (currentIndex + 1 >= questions.length) {
+        clearState()
         const encoded = btoa(JSON.stringify(newAnswers))
         router.push(`/result?data=${encoded}`)
       } else {
-        setCurrentIndex((prev) => prev + 1)
+        const nextIndex = currentIndex + 1
+        setCurrentIndex(nextIndex)
+        saveState(nextIndex, newAnswers)
         setIsTransitioning(false)
       }
     }, 300)
@@ -48,15 +100,44 @@ export function TestPage() {
         <div className="absolute -top-20 left-1/2 h-[400px] w-[600px] -translate-x-1/2 rounded-full bg-[var(--color-brand-purple)]/4 blur-[100px]" />
       </div>
 
+      {/* Resume prompt */}
+      {showResume && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[var(--color-paper)]/80 backdrop-blur-sm">
+          <GlassCard variant="prominent" glow="purple" className="mx-4 max-w-sm p-8 text-center">
+            <h2 className="mb-3 text-lg font-semibold text-[var(--color-text-primary)]">
+              发现未完成的测试
+            </h2>
+            <p className="mb-6 text-sm text-[var(--color-text-secondary)]">
+              你上次回答了 {savedState?.answers.length ?? 0} / {questions.length} 题，要继续吗？
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={handleReset}
+                className="flex-1 rounded-lg border border-white/8 bg-white/[0.02] px-4 py-2.5 text-sm text-[var(--color-text-secondary)] transition-colors hover:border-white/15 hover:text-white"
+              >
+                重新开始
+              </button>
+              <button
+                onClick={handleResume}
+                className="gradient-primary flex-1 rounded-lg px-4 py-2.5 text-sm font-medium text-white shadow-lg transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+              >
+                继续答题
+              </button>
+            </div>
+          </GlassCard>
+        </div>
+      )}
+
       {/* Header */}
       <div className="w-full max-w-xl pt-8">
         <div className="mb-2 flex items-center justify-between">
           <button
             onClick={handleGoBack}
             disabled={currentIndex === 0}
+            aria-label="上一题"
             className="flex items-center gap-1 text-xs text-[var(--color-text-tertiary)] transition-colors hover:text-white disabled:opacity-20"
           >
-            <ChevronLeft className="size-3" />
+            <ChevronLeft className="size-3" aria-hidden="true" />
             上一题
           </button>
           <span className="text-xs tabular-nums text-[var(--color-text-tertiary)]">
@@ -66,8 +147,8 @@ export function TestPage() {
         </div>
 
         <ProgressBar
-          value={currentIndex}
-          max={questions.length - 1}
+          value={currentIndex + 1}
+          max={questions.length}
           showLabel={false}
           variant="primary"
         />

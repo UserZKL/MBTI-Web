@@ -28,7 +28,7 @@ export function SharePageClient({
       <GlassCard variant="prominent" glow="purple" className="w-full max-w-md p-8 text-center sm:p-10">
         <TypeBadge type={typeCode} size="lg" className="mb-4" />
 
-        <GradientText as="h2" className="mb-2 text-2xl font-bold">
+        <GradientText as="h1" className="mb-2 text-2xl font-bold">
           {typeName}
         </GradientText>
 
@@ -36,16 +36,16 @@ export function SharePageClient({
           {description}
         </p>
 
-        <div className="mb-6 flex flex-wrap justify-center gap-1.5">
+        <ul className="mb-6 flex flex-wrap justify-center gap-1.5">
           {strengths.slice(0, 3).map((s) => (
-            <span
+            <li
               key={s}
               className="rounded-full border border-white/8 px-2.5 py-1 text-[10px] text-[var(--color-text-tertiary)]"
             >
               {s}
-            </span>
+            </li>
           ))}
-        </div>
+        </ul>
 
         <div className="flex items-center justify-center gap-3">
           <GradientButton
