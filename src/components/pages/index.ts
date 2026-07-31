@@ -1,0 +1,8 @@
+export { LandingPage } from "./landing-page"
+export { TestPage } from "./test-page"
+export { ResultPage } from "./result-page"
+export { SharePageClient, generateTypePage } from "./share-page"
+export { AllTypesPage } from "./all-types-page"
+export { TypeDetailPage } from "./type-detail-page"
+export { LoginPage } from "./login-page"
+export { ProfilePage } from "./profile-page"

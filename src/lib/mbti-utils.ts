@@ -44,12 +44,19 @@ export interface MbtiResult {
   }[]
 }
 
-interface PersonalityTypeData {
+export interface PersonalityTypeData {
   code: string
   name: string
   nickname: string
   description: string
-  traits: Record<string, unknown>
+  traits: {
+    cognitiveFunctions?: string[]
+    keywords?: string[]
+    communicationStyle?: string
+    stressResponse?: string
+    learningStyle?: string
+    [key: string]: unknown
+  }
   strengths: string[]
   weaknesses: string[]
   careers: string[]
