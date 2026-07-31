@@ -11,9 +11,10 @@ import { ResultChart } from "@/components/shared/result-chart"
 import { TypeBadge } from "@/components/shared/type-badge"
 import { calculateResult, getPersonalityTypeData, type Answer } from "@/lib/mbti-utils"
 import { type MbtiResult } from "@/lib/mbti-utils"
+import { drawResultCard, downloadDataUrl } from "@/lib/export-card"
 import {
   Share2, RefreshCw, Users, Briefcase, Heart, TrendingUp,
-  Sparkles, Loader2, FileJson
+  Sparkles, Loader2, ImageDown
 } from "lucide-react"
 
 export function ResultPage() {
@@ -116,24 +117,30 @@ export function ResultPage() {
     }
   }
 
-  const handleDownloadJson = () => {
+  const [downloadState, setDownloadState] = useState<"idle" | "loading" | "done" | "error">("idle")
+
+  const handleDownloadImage = async () => {
     if (!result) return
-    const payload = {
-      type: result.type,
-      typeName: result.typeName,
-      scores: result.scores,
-      percentages: result.percentages,
-      confidence: result.confidence,
-      dimensions: result.dimensions,
-      ...(reportText ? { report: reportText } : {}),
+    setDownloadState("loading")
+    try {
+      const url = await drawResultCard({
+        typeCode: result.type,
+        typeName: result.typeName,
+        description: typeData?.description ?? "",
+        strengths: typeData?.strengths ?? [],
+        dimensions: result.dimensions.map((dim) => ({
+          left: dim.left.dimension,
+          right: dim.right.dimension,
+          leftPct: dim.left.percentage,
+          rightPct: dim.right.percentage,
+        })),
+        footer: "MBTI 人格测试 · 你也来测一测 →",
+      })
+      downloadDataUrl(url, `mbti-result-${result.type}.png`)
+      setDownloadState("done")
+    } catch {
+      setDownloadState("error")
     }
-    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement("a")
-    a.href = url
-    a.download = `mbti-result-${result.type}-${Date.now()}.json`
-    a.click()
-    URL.revokeObjectURL(url)
   }
 
   if (!result) {
@@ -378,12 +385,22 @@ export function ResultPage() {
           </GradientLink>
           <GradientButton
             variant="outline"
-            onClick={handleDownloadJson}
+            onClick={handleDownloadImage}
+            disabled={downloadState === "loading"}
             className="flex items-center gap-2"
           >
-            <FileJson className="size-4" />
-            下载 JSON
+            {downloadState === "loading" ? (
+              <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+            ) : (
+              <ImageDown className="size-4" aria-hidden="true" />
+            )}
+            {downloadState === "loading" ? "生成中..." : "下载图片"}
           </GradientButton>
+          {downloadState === "error" && (
+            <p className="w-full text-center text-xs text-[var(--color-error)]">
+              图片生成失败，请重试
+            </p>
+          )}
         </section>
       </div>
 

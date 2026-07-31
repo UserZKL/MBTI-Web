@@ -50,7 +50,7 @@ export function DimensionBar({ left, right, className }: DimensionBarProps) {
           className="h-full flex-1 rounded-r-full bg-[var(--color-surface-3)] transition-all duration-700 ease-out"
         />
       </div>
-      <div className="mt-1 flex items-center justify-between text-[10px] tabular-nums">
+      <div className="mt-1 flex items-center justify-between text-xs tabular-nums">
         <span className="text-[var(--color-text-tertiary)]">
           {left.value} 分 · {leftPct}%
         </span>

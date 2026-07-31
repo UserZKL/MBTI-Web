@@ -216,7 +216,7 @@ export function ComparePage() {
                   </h3>
                   <div className="flex flex-wrap gap-1.5">
                     {shared.map((s) => (
-                      <span key={s} className="rounded-full border border-[var(--color-brand-gold)]/20 px-2.5 py-1 text-[11px] text-[var(--color-brand-gold)]">
+                      <span key={s} className="rounded-full border border-[var(--color-brand-gold)]/20 px-2.5 py-1 text-xs text-[var(--color-brand-gold)]">
                         {s}
                       </span>
                     ))}

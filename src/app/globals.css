@@ -11,6 +11,13 @@
   --font-display: var(--font-display-custom, var(--font-geist-sans));
   --font-body: var(--font-body-custom, var(--font-geist-sans));
 
+  --text-xs: 0.875rem;
+  --text-xs--line-height: 1.5;
+  --text-sm: 1rem;
+  --text-sm--line-height: 1.6;
+  --text-base: 1.0625rem;
+  --text-base--line-height: 1.6;
+
   --color-paper: var(--color-paper);
   --color-paper-2: var(--color-paper-2);
   --color-paper-3: var(--color-paper-3);

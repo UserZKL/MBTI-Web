@@ -78,7 +78,7 @@ export function ProfilePage() {
                     <TypeBadge type={entry.type} size="sm" />
                     <div>
                       <p className="text-sm text-[var(--color-text-primary)]">{entry.typeName}</p>
-                      <p className="text-[10px] text-[var(--color-text-tertiary)]">{entry.date}</p>
+                      <p className="text-xs text-[var(--color-text-tertiary)]">{entry.date}</p>
                     </div>
                   </div>
                   <ChevronRight className="size-4 text-[var(--color-text-tertiary)]" aria-hidden="true" />
@@ -93,19 +93,19 @@ export function ProfilePage() {
           <GlassCard variant="subtle" className="flex flex-col items-center p-5 text-center">
             <TestTube className="mb-2 size-5 text-[var(--color-brand-purple)]" />
             <p className="text-lg font-bold text-[var(--color-text-primary)] tabular-nums">3</p>
-            <p className="text-[10px] text-[var(--color-text-tertiary)]">已完成测试</p>
+            <p className="text-xs text-[var(--color-text-tertiary)]">已完成测试</p>
           </GlassCard>
 
           <GlassCard variant="subtle" className="flex flex-col items-center p-5 text-center">
             <TrendingUp className="mb-2 size-5 text-[var(--color-brand-cyan)]" />
             <p className="text-lg font-bold text-[var(--color-text-primary)] tabular-nums">1</p>
-            <p className="text-[10px] text-[var(--color-text-tertiary)]">主要类型</p>
+            <p className="text-xs text-[var(--color-text-tertiary)]">主要类型</p>
           </GlassCard>
 
           <GlassCard variant="subtle" className="flex flex-col items-center p-5 text-center">
             <History className="mb-2 size-5 text-[var(--color-brand-gold)]" />
             <p className="text-lg font-bold text-[var(--color-text-primary)] tabular-nums">2</p>
-            <p className="text-[10px] text-[var(--color-text-tertiary)]">类型变化</p>
+            <p className="text-xs text-[var(--color-text-tertiary)]">类型变化</p>
           </GlassCard>
         </section>
 

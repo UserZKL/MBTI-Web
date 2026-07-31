@@ -2,11 +2,12 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
+import Link from "next/link"
 import { ProgressBar } from "@/components/shared/progress-bar"
 import { GlassCard } from "@/components/shared/glass-card"
 import { Button } from "@/components/ui/button"
 import { getQuestions, type Answer, type Question } from "@/lib/mbti-utils"
-import { ChevronLeft } from "lucide-react"
+import { ChevronLeft, ChevronRight, Home } from "lucide-react"
 
 const STORAGE_KEY = "mbti-test-state"
 
@@ -66,6 +67,8 @@ export function TestPage() {
 
   const currentQuestion: Question = questions[currentIndex]
 
+  const answeredIds = new Set(answers.map((a) => a.questionId))
+
   function handleAnswer(answer: "agree" | "disagree") {
     setIsTransitioning(true)
 
@@ -91,6 +94,24 @@ export function TestPage() {
       setCurrentIndex((prev) => prev - 1)
       setAnswers((prev) => prev.slice(0, -1))
     }
+  }
+
+  function handleGoNext() {
+    if (currentIndex + 1 < questions.length) {
+      setCurrentIndex((prev) => prev + 1)
+    }
+  }
+
+  function handleJump(index: number) {
+    const answered = answers.filter((a) => a.questionId === questions[index]?.id)
+    setCurrentIndex(index)
+    if (answered.length > 0) {
+      setAnswers((prev) => prev.slice(0, index))
+      saveState(index, answers.slice(0, index))
+    } else {
+      saveState(index, answers)
+    }
+    setIsTransitioning(false)
   }
 
   return (
@@ -129,21 +150,27 @@ export function TestPage() {
       )}
 
       {/* Header */}
-      <div className="w-full max-w-xl pt-8">
+      <div className="w-full max-w-2xl pt-8">
         <div className="mb-2 flex items-center justify-between">
           <button
             onClick={handleGoBack}
             disabled={currentIndex === 0}
             aria-label="上一题"
-            className="flex items-center gap-1 text-xs text-[var(--color-text-tertiary)] transition-colors hover:text-white disabled:opacity-20"
+            className="flex items-center gap-1 text-sm text-[var(--color-text-tertiary)] transition-colors hover:text-white disabled:opacity-20"
           >
-            <ChevronLeft className="size-3" aria-hidden="true" />
+            <ChevronLeft className="size-4" aria-hidden="true" />
             上一题
           </button>
-          <span className="text-xs tabular-nums text-[var(--color-text-tertiary)]">
+          <span className="text-sm tabular-nums text-[var(--color-text-tertiary)]">
             {currentIndex + 1} / {questions.length}
           </span>
-          <div className="w-12" />
+          <Link
+            href="/"
+            aria-label="返回首页"
+            className="flex items-center gap-1 text-sm text-[var(--color-text-tertiary)] transition-colors hover:text-white"
+          >
+            <Home className="size-4" aria-hidden="true" />
+          </Link>
         </div>
 
         <ProgressBar
@@ -155,7 +182,7 @@ export function TestPage() {
       </div>
 
       {/* Question Card */}
-      <div className="mt-8 flex w-full max-w-xl flex-1 flex-col items-center">
+      <div className="mt-6 flex w-full max-w-2xl flex-1 flex-col items-center">
         <div
           className="w-full transition-all duration-300"
           style={{
@@ -163,29 +190,29 @@ export function TestPage() {
             transform: isTransitioning ? "translateY(8px)" : "translateY(0)",
           }}
         >
-          <GlassCard variant="prominent" className="p-8 sm:p-12">
+          <GlassCard variant="prominent" className="p-8 sm:p-14">
             {/* Question number badge */}
-            <div className="mb-6 inline-flex items-center gap-1.5 rounded-full border border-white/8 bg-white/[0.02] px-3 py-1 text-[10px] text-[var(--color-text-tertiary)]">
+            <div className="mb-6 inline-flex items-center gap-1.5 rounded-full border border-white/8 bg-white/[0.02] px-4 py-1.5 text-sm text-[var(--color-text-tertiary)]">
               第 {currentIndex + 1} 题
             </div>
 
             {/* Question text */}
-            <h2 className="mb-10 text-xl font-medium leading-relaxed text-[var(--color-text-primary)] sm:text-2xl">
+            <h2 className="mb-12 text-2xl font-medium leading-relaxed text-[var(--color-text-primary)] sm:text-3xl">
               {currentQuestion.text}
             </h2>
 
             {/* Answer buttons */}
-            <div className="flex gap-3">
+            <div className="flex gap-4">
               <Button
                 onClick={() => handleAnswer("agree")}
-                className="gradient-primary flex-1 border-0 py-6 text-base font-medium text-white shadow-lg transition-all duration-200 hover:scale-[1.02] hover:shadow-[0_0_30px_rgba(124,58,237,0.3)] active:scale-[0.98]"
+                className="gradient-primary flex-1 border-0 py-8 text-lg font-medium text-white shadow-lg transition-all duration-200 hover:scale-[1.02] hover:shadow-[0_0_30px_rgba(124,58,237,0.3)] active:scale-[0.98]"
               >
                 符合
               </Button>
               <Button
                 onClick={() => handleAnswer("disagree")}
                 variant="outline"
-                className="flex-1 border-white/8 bg-white/[0.02] py-6 text-base font-medium text-[var(--color-text-secondary)] transition-all duration-200 hover:scale-[1.02] hover:border-white/15 hover:bg-white/[0.04] active:scale-[0.98]"
+                className="flex-1 border-white/8 bg-white/[0.02] py-8 text-lg font-medium text-[var(--color-text-secondary)] transition-all duration-200 hover:scale-[1.02] hover:border-white/15 hover:bg-white/[0.04] active:scale-[0.98]"
               >
                 不符合
               </Button>
@@ -193,8 +220,63 @@ export function TestPage() {
           </GlassCard>
         </div>
 
+        {/* Prev / Next navigation buttons */}
+        <div className="mt-6 flex w-full gap-4">
+          <Button
+            onClick={handleGoBack}
+            disabled={currentIndex === 0}
+            variant="outline"
+            className="flex-1 border-white/8 bg-white/[0.02] py-4 text-base font-medium text-[var(--color-text-secondary)] transition-all duration-200 hover:border-white/15 hover:bg-white/[0.04] disabled:opacity-30"
+          >
+            <ChevronLeft className="size-5" aria-hidden="true" />
+            上一题
+          </Button>
+          <Button
+            onClick={handleGoNext}
+            disabled={currentIndex + 1 >= questions.length}
+            variant="outline"
+            className="flex-1 border-white/8 bg-white/[0.02] py-4 text-base font-medium text-[var(--color-text-secondary)] transition-all duration-200 hover:border-white/15 hover:bg-white/[0.04] disabled:opacity-30"
+          >
+            下一题
+            <ChevronRight className="size-5" aria-hidden="true" />
+          </Button>
+        </div>
+
+        {/* 60-question grid navigator */}
+        <GlassCard variant="subtle" className="mt-6 w-full p-5">
+          <div className="mb-3 flex items-center justify-between">
+            <span className="text-sm text-[var(--color-text-secondary)]">答题进度</span>
+            <span className="text-sm tabular-nums text-[var(--color-brand-cyan)]">
+              已答 {answers.length} / {questions.length}
+            </span>
+          </div>
+          <div className="grid grid-cols-10 gap-1.5 sm:grid-cols-15">
+            {questions.map((q, i) => {
+              const isAnswered = answeredIds.has(q.id)
+              const isCurrent = i === currentIndex
+              return (
+                <button
+                  key={q.id}
+                  onClick={() => handleJump(i)}
+                  aria-label={`第 ${i + 1} 题${isAnswered ? "（已作答）" : ""}`}
+                  aria-current={isCurrent ? "true" : undefined}
+                  className={`flex h-9 items-center justify-center rounded-md text-sm font-medium tabular-nums transition-all duration-200 ${
+                    isCurrent
+                      ? "border-2 border-[var(--color-brand-gold)] bg-white/[0.06] text-[var(--color-brand-gold)]"
+                      : isAnswered
+                        ? "gradient-primary text-white shadow-md"
+                        : "border border-white/8 bg-white/[0.02] text-[var(--color-text-tertiary)] hover:border-white/20 hover:text-white"
+                  }`}
+                >
+                  {i + 1}
+                </button>
+              )
+            })}
+          </div>
+        </GlassCard>
+
         {/* Tips */}
-        <p className="mt-6 text-center text-xs text-[var(--color-text-tertiary)]">
+        <p className="mt-6 text-center text-sm text-[var(--color-text-tertiary)]">
           凭第一反应作答，没有对错之分
         </p>
       </div>

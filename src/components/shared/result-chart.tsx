@@ -167,7 +167,7 @@ export function ResultChart({ dimensions, className }: ResultChartProps) {
               x={p.x + cfg.pctLabelDx}
               y={p.y + cfg.pctLabelDy}
               textAnchor={cfg.anchor}
-              className="fill-[var(--color-text-secondary)] text-[11px] tabular-nums"
+              className="fill-[var(--color-text-secondary)] text-xs tabular-nums"
               dominantBaseline="middle"
             >
               {p.pct}%

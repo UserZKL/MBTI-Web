@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono, Noto_Serif_SC, Noto_Sans_SC } from "next/font/google";
 import { SessionProvider } from "next-auth/react";
+import { HomeButton } from "@/components/shared/home-button";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -78,6 +79,7 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col bg-paper-2 text-text-primary font-sans">
         <SessionProvider>
           <main>{children}</main>
+          <HomeButton />
         </SessionProvider>
       </body>
     </html>

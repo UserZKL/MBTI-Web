@@ -63,10 +63,11 @@ test.describe("Flow 2: Type Browsing", () => {
 })
 
 test.describe("Flow 3: Login Page", () => {
-  test("should render login page with Google button", async ({ page }) => {
+  test("should render login page with email form", async ({ page }) => {
     await page.goto("/login")
     await expect(page.locator("h1")).toContainText("登录")
-    await expect(page.getByRole("button", { name: /Google/ })).toBeVisible()
+    await expect(page.getByLabel("邮箱地址")).toBeVisible()
+    await expect(page.getByRole("button", { name: /发送验证码/ })).toBeVisible()
   })
 })
 

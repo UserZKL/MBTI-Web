@@ -157,7 +157,7 @@ export function ProfileClient({ user }: ProfileClientProps) {
                           <p className="text-sm text-[var(--color-text-primary)]">
                             {TYPE_NAMES[entry.typeCode] ?? entry.typeCode}
                           </p>
-                          <p className="text-[10px] text-[var(--color-text-tertiary)]">
+                          <p className="text-xs text-[var(--color-text-tertiary)]">
                             {new Date(entry.createdAt).toLocaleDateString("zh-CN")}
                           </p>
                         </div>
@@ -178,7 +178,7 @@ export function ProfileClient({ user }: ProfileClientProps) {
             <p className="text-lg font-bold text-[var(--color-text-primary)] tabular-nums">
               {total}
             </p>
-            <p className="text-[10px] text-[var(--color-text-tertiary)]">已完成测试</p>
+            <p className="text-xs text-[var(--color-text-tertiary)]">已完成测试</p>
           </GlassCard>
 
           <GlassCard variant="subtle" className="flex flex-col items-center p-5 text-center">
@@ -186,7 +186,7 @@ export function ProfileClient({ user }: ProfileClientProps) {
             <p className="text-lg font-bold text-[var(--color-text-primary)] tabular-nums">
               {uniqueTypes}
             </p>
-            <p className="text-[10px] text-[var(--color-text-tertiary)]">不同类型</p>
+            <p className="text-xs text-[var(--color-text-tertiary)]">不同类型</p>
           </GlassCard>
 
           <GlassCard variant="subtle" className="flex flex-col items-center p-5 text-center">
@@ -194,7 +194,7 @@ export function ProfileClient({ user }: ProfileClientProps) {
             <p className="text-lg font-bold text-[var(--color-text-primary)] tabular-nums">
               {typeChanges}
             </p>
-            <p className="text-[10px] text-[var(--color-text-tertiary)]">类型变化</p>
+            <p className="text-xs text-[var(--color-text-tertiary)]">类型变化</p>
           </GlassCard>
         </section>
 

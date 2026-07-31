@@ -43,10 +43,10 @@ export default function BlogPage() {
             <Link key={post.slug} href={`/blog/${post.slug}`}>
               <GlassCard variant="subtle" hover className="group p-6">
                 <div className="flex flex-wrap items-center gap-2 mb-2">
-                  <span className="rounded-full border border-white/8 bg-white/[0.03] px-2 py-0.5 text-[10px] text-[var(--color-brand-cyan)]">
+                  <span className="rounded-full border border-white/8 bg-white/[0.03] px-2 py-0.5 text-xs text-[var(--color-brand-cyan)]">
                     {CATEGORY_LABELS[post.category] ?? post.category}
                   </span>
-                  <span className="flex items-center gap-1 text-[10px] text-[var(--color-text-tertiary)]">
+                  <span className="flex items-center gap-1 text-xs text-[var(--color-text-tertiary)]">
                     <Clock className="size-2.5" />
                     {post.readTimeMinutes} 分钟
                   </span>
@@ -60,9 +60,9 @@ export default function BlogPage() {
                 </p>
 
                 <div className="flex items-center gap-2">
-                  <span className="text-[10px] text-[var(--color-text-tertiary)]">{post.date}</span>
+                  <span className="text-xs text-[var(--color-text-tertiary)]">{post.date}</span>
                   {post.tags.slice(0, 3).map((tag) => (
-                    <span key={tag} className="flex items-center gap-0.5 text-[10px] text-[var(--color-text-tertiary)]">
+                    <span key={tag} className="flex items-center gap-0.5 text-xs text-[var(--color-text-tertiary)]">
                       <Tag className="size-2.5" />
                       {tag}
                     </span>

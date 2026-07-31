@@ -54,7 +54,7 @@ export default async function BlogDetailPage({ params }: Props) {
         <article>
           <header className="mb-8">
             <div className="mb-4 flex flex-wrap items-center gap-3">
-              <span className="rounded-full border border-white/8 bg-white/[0.03] px-2.5 py-0.5 text-[11px] text-[var(--color-brand-cyan)]">
+              <span className="rounded-full border border-white/8 bg-white/[0.03] px-2.5 py-0.5 text-xs text-[var(--color-brand-cyan)]">
                 {(() => {
                   const labels: Record<string, string> = {
                     basics: "基础入门",
@@ -66,11 +66,11 @@ export default async function BlogDetailPage({ params }: Props) {
                   return labels[post.category] ?? post.category
                 })()}
               </span>
-              <span className="flex items-center gap-1 text-[11px] text-[var(--color-text-tertiary)]">
+              <span className="flex items-center gap-1 text-xs text-[var(--color-text-tertiary)]">
                 <Clock className="size-3" />
                 {post.readTimeMinutes} 分钟
               </span>
-              <span className="flex items-center gap-1 text-[11px] text-[var(--color-text-tertiary)]">
+              <span className="flex items-center gap-1 text-xs text-[var(--color-text-tertiary)]">
                 <Calendar className="size-3" />
                 {post.date}
               </span>
@@ -88,7 +88,7 @@ export default async function BlogDetailPage({ params }: Props) {
               {post.tags.map((tag) => (
                 <span
                   key={tag}
-                  className="flex items-center gap-0.5 rounded-full border border-white/6 bg-white/[0.02] px-2 py-0.5 text-[10px] text-[var(--color-text-tertiary)]"
+                  className="flex items-center gap-0.5 rounded-full border border-white/6 bg-white/[0.02] px-2 py-0.5 text-xs text-[var(--color-text-tertiary)]"
                 >
                   <Tag className="size-2.5" />
                   {tag}
