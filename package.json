@@ -1,7 +1,8 @@
 {
-  "name": "mbti-app",
+  "name": "mbti-web",
   "version": "0.1.0",
   "private": true,
+  "description": "MBTI 人格测试网站 — 72 题免费测试、16 型结果分析、AI 深度报告、类型对比与统计",
   "scripts": {
     "dev": "next dev --webpack",
     "build": "next build --webpack",
