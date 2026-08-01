@@ -70,7 +70,6 @@ export function TestPage() {
       : null
   })
   const [incompleteNotice, setIncompleteNotice] = useState(false)
-  const [redIds, setRedIds] = useState<Set<number>>(new Set())
   const questionRefs = useRef<Record<number, HTMLDivElement | null>>({})
 
   function handleResume() {
@@ -98,13 +97,6 @@ export function TestPage() {
       ? answers.map((a) => (a.questionId === questionId ? { questionId, answer } : a))
       : [...answers, { questionId, answer }]
     setAnswers(newAnswers)
-    setRedIds((prev) => {
-      if (!prev.has(questionId)) return prev
-      const next = new Set(prev)
-      next.delete(questionId)
-      return next
-    })
-    saveState(currentPage, newAnswers)
   }
 
   function handleGoPrev() {
@@ -112,7 +104,6 @@ export function TestPage() {
       const nextPage = currentPage - 1
       setCurrentPage(nextPage)
       setIncompleteNotice(false)
-      setRedIds(new Set())
       saveState(nextPage, answers)
       window.scrollTo({ top: 0, behavior: "smooth" })
     }
@@ -121,7 +112,6 @@ export function TestPage() {
   function handleGoNext() {
     const unanswered = pageQuestions.filter((q) => !answeredIds.has(q.id))
     if (unanswered.length > 0) {
-      setRedIds(new Set(unanswered.map((q) => q.id)))
       setIncompleteNotice(true)
       const firstId = unanswered[0]?.id
       if (firstId !== undefined) {
@@ -131,7 +121,6 @@ export function TestPage() {
     }
 
     setIncompleteNotice(false)
-    setRedIds(new Set())
 
     if (currentPage >= PAGE_COUNT - 1) {
       clearState()
@@ -150,7 +139,7 @@ export function TestPage() {
     <div className="relative flex min-h-screen flex-col items-center overflow-x-clip px-4">
       {/* Background glow */}
       <div className="pointer-events-none fixed inset-0 -z-10">
-        <div className="absolute -top-20 left-1/2 h-[400px] w-[600px] -translate-x-1/2 rounded-full bg-[var(--color-brand-purple)]/4 blur-[100px]" />
+        <div className="absolute -top-20 left-1/2 h-[400px] w-[600px] -translate-x-1/2 rounded-full bg-[radial-gradient(circle,rgba(124,58,237,0.09)_0%,rgba(124,58,237,0)_70%)]" />
       </div>
 
       {/* Resume prompt */}
@@ -207,7 +196,6 @@ export function TestPage() {
         <div className="space-y-4">
           {pageQuestions.map((q, idx) => {
             const isAnswered = answeredIds.has(q.id)
-            const isRed = redIds.has(q.id)
             const globalIndex = pageStart + idx
             return (
               <div
@@ -216,12 +204,7 @@ export function TestPage() {
                   questionRefs.current[q.id] = el
                 }}
               >
-                <GlassCard
-                  variant={isAnswered ? "subtle" : "prominent"}
-                  className={`p-6 sm:p-8 transition-all duration-200 ${
-                    isRed ? "border-2 border-[var(--color-error)]/60" : ""
-                  }`}
-                >
+                <GlassCard variant={isAnswered ? "subtle" : "prominent"} className="p-6 transition-all duration-200 sm:p-8">
                   {/* Question number badge */}
                   <div className="mb-4 inline-flex items-center gap-1.5 rounded-full border border-white/8 bg-white/[0.02] px-3.5 py-1 text-sm text-[var(--color-text-tertiary)]">
                     第 {globalIndex + 1} 题
@@ -290,7 +273,7 @@ export function TestPage() {
             role="alert"
             className="mt-3 w-full rounded-lg border border-[var(--color-brand-amber)]/30 bg-[var(--color-brand-amber)]/10 px-4 py-3 text-center text-sm text-[var(--color-brand-amber)]"
           >
-            本页还有 {pageQuestions.length - pageQuestions.filter((q) => answeredIds.has(q.id)).length} 题未作答，请完成本页全部题目（未答题已标红）
+            本页还有 {pageQuestions.length - pageQuestions.filter((q) => answeredIds.has(q.id)).length} 题未作答，请完成本页全部题目后再进入下一页
           </div>
         )}
       </div>

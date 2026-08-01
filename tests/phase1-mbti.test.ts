@@ -46,9 +46,24 @@ describe('question bank', () => {
     expect(counts['J'] + counts['P']).toBe(15)
   })
 
-  it('should have all forward direction', () => {
-    for (const q of getQuestions()) {
-      expect(q.direction).toBe('forward')
+  it('should have a mix of forward and reverse questions', () => {
+    const questions = getQuestions()
+    const forward = questions.filter((q) => q.direction === 'forward').length
+    const reverse = questions.filter((q) => q.direction === 'reverse').length
+
+    // At least 12 reverse questions (3 per dimension pair)
+    expect(forward).toBe(48)
+    expect(reverse).toBe(12)
+
+    // Each dimension pair must contain at least 1 reverse question
+    for (const pair of ['EI', 'SN', 'TF', 'JP'] as const) {
+      const pairQuestions = questions.filter((q) =>
+        pair === 'EI' ? q.dimension === 'E' || q.dimension === 'I'
+        : pair === 'SN' ? q.dimension === 'S' || q.dimension === 'N'
+        : pair === 'TF' ? q.dimension === 'T' || q.dimension === 'F'
+        : q.dimension === 'J' || q.dimension === 'P'
+      )
+      expect(pairQuestions.some((q) => q.direction === 'reverse'), `${pair} pair should have reverse questions`).toBe(true)
     }
   })
 
@@ -101,6 +116,21 @@ describe('scoring algorithm', () => {
     const scores = calculateScores(answers)
     expect(scores.I).toBe(3) // weight 3
     expect(scores.E).toBe(0)
+  })
+
+  it('should score reverse question agree as opposite dimension', () => {
+    // q2 is reverse (dimension E, describes introverted behavior)
+    const answers: Answer[] = [{ questionId: 2, answer: 'agree' }]
+    const scores = calculateScores(answers)
+    expect(scores.I).toBe(2) // agree on reverse E → I
+    expect(scores.E).toBe(0)
+  })
+
+  it('should score reverse question disagree as own dimension', () => {
+    const answers: Answer[] = [{ questionId: 2, answer: 'disagree' }]
+    const scores = calculateScores(answers)
+    expect(scores.E).toBe(2) // disagree on reverse E → E
+    expect(scores.I).toBe(0)
   })
 })
 
@@ -247,10 +277,9 @@ describe('boundary tests', () => {
     })
 
     it('should handle reverse-scored answers', () => {
-      // mock: the code has reverse logic, test it directly if reachable
-      // All real questions are forward, but the function handles reverse
-      const scores = calculateScores([{ questionId: 1, answer: 'disagree' }])
-      expect(scores.I).toBe(2) // disagree on forward E → I gets score
+      // q2 is a real reverse question (dimension E, introverted wording)
+      const scores = calculateScores([{ questionId: 2, answer: 'agree' }])
+      expect(scores.I).toBe(2) // agree on reverse E → I
     })
 
     it('should handle duplicate questionIds by double-counting', () => {
@@ -392,8 +421,13 @@ function createAnswersForType(
 ): Answer[] {
   const target = new Set([dim1, dim2, dim3, dim4])
 
-  return getQuestions().map((q) => ({
-    questionId: q.id,
-    answer: target.has(q.dimension) ? 'agree' : ('disagree' as const),
-  }))
+  return getQuestions().map((q) => {
+    const agreeGivesTarget = q.direction === 'forward'
+      ? target.has(q.dimension)
+      : !target.has(q.dimension) // reverse: agree → opposite dimension
+    return {
+      questionId: q.id,
+      answer: agreeGivesTarget ? ('agree' as const) : ('disagree' as const),
+    }
+  })
 }

@@ -64,8 +64,8 @@ export function SharePageClient({
   return (
     <div className="relative flex min-h-screen flex-col items-center justify-center overflow-x-clip p-4">
       <div className="pointer-events-none fixed inset-0 -z-10">
-        <div className="absolute top-0 right-0 h-[500px] w-[500px] rounded-full bg-[var(--color-brand-purple)]/3 blur-[120px]" />
-        <div className="absolute bottom-0 left-0 h-[400px] w-[400px] rounded-full bg-[var(--color-brand-gold)]/2 blur-[100px]" />
+        <div className="absolute top-0 right-0 h-[500px] w-[500px] rounded-full bg-[radial-gradient(circle,rgba(124,58,237,0.07)_0%,rgba(124,58,237,0)_70%)]" />
+        <div className="absolute bottom-0 left-0 h-[400px] w-[400px] rounded-full bg-[radial-gradient(circle,rgba(212,168,83,0.05)_0%,rgba(212,168,83,0)_70%)]" />
       </div>
 
       <GlassCard variant="prominent" glow="purple" className="w-full max-w-md p-8 text-center sm:p-10">

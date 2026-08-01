@@ -237,3 +237,38 @@ ew PrismaLibSql({ url })（adapter 内部自建 client）→ 所有保存请求 
 ### 备注
 - E2E Flow 1/6 修复 strict mode 断言（每页 10 个 h2 → .first()；Next.js route announcer 的 role=alert 干扰 → .first()）
 - dev server 曾意外挂掉（PID 变化），重启后需预热路由避免首次编译超时
+---
+
+## V5 优化报告（USER_FEEDBACK4.txt · 3 条反馈）
+
+### ① 撤回题目标红
+- 删除做题页未答题标红（redIds 状态、border-error 高亮、文案「未答题已标红」）
+- 保留：未答完点「下一页」拦截 + 提示条（role=alert）+ 自动滚动定位第一个未答题
+
+### ② 性能优化（网站卡顿）
+- **删除未使用的 Noto Serif SC 字体**（layout.tsx + globals.css --font-display），构建产物减少约 100 个 woff2 分片、主 CSS 272KB 大幅瘦身
+- **全站 22 处大尺寸 blur 光斑 → 预模糊 radial-gradient**（14 个文件），消除每帧大区域高斯模糊重采样
+- **首页 3 个 bg-drift 动画光斑去 blur** + will-change: transform（28s/34s/40s 无限动画不再触发 GPU 模糊重算）
+- **Reveal 组件 IntersectionObserver 单例化**（26 个 observer → 1 个共享）+ 移除永久 will-change-transform 合成层
+- **做题页每点一题不再全量序列化写 sessionStorage**（仅翻页时保存）
+- **结果页解析 useMemo 化**（atob + JSON.parse + calculateResult 只在 dataParam 变化时执行）
+- 效果：E2E 全量耗时 11.1m → 1.2m（约 9 倍提速）
+
+### ③ 结果准确性（反向题 + 边缘维度）
+- **题库 12 题改为反向表述**（每维度对 3 题，文本改写为反维度行为描述，direction: reverse），forward 48 + reverse 12，打破全正向答题的惯性偏差
+- **算法增强**：dimensions 每项新增 isEdge 标记（dominant 百分比 < 55 判定），结果页展示琥珀色提示「你的 X/Y 维度接近中间值…建议重新测试确认」
+- 全符合答题的结果类型由 ISFP → ISTJ（反向题生效验证）
+
+### 验证
+| Check | Result |
+|-------|--------|
+| typecheck | ✅ |
+| lint | ✅ 0 errors 0 warnings |
+| test | ✅ 84/84（新增 2 个反向计分测试 + 题库断言更新） |
+| build | ✅ 43 routes + Proxy(Middleware) |
+| E2E | ✅ 55/55（1.2m） |
+| Git | V5 commit |
+
+### 备注
+- 题库备份：C:\Users\86187\AppData\Local\Temp\opencode\question-bank-backup.json
+- createAnswersForType 测试辅助函数已适配反向计分（reverse 题：target 含维度 → disagree）

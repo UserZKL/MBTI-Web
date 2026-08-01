@@ -74,11 +74,29 @@ export function LandingPage() {
 
   return (
     <div className="relative min-h-screen overflow-x-clip">
-      {/* Dynamic ambient background */}
+      {/* Dynamic ambient background (pre-blurred radial gradients, no live filter) */}
       <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
-        <div className="bg-drift-1 absolute -top-40 left-1/2 h-[600px] w-[800px] -translate-x-1/2 rounded-full bg-[var(--color-brand-purple)]/6 blur-[120px]" />
-        <div className="bg-drift-2 absolute top-1/3 right-0 h-[400px] w-[500px] rounded-full bg-[var(--color-brand-cyan)]/5 blur-[100px]" />
-        <div className="bg-drift-3 absolute bottom-0 left-[-10%] h-[500px] w-[600px] rounded-full bg-[var(--color-brand-gold)]/4 blur-[110px]" />
+        <div
+          className="bg-drift-1 absolute -top-40 left-1/2 h-[600px] w-[800px] -translate-x-1/2 rounded-full"
+          style={{
+            background:
+              "radial-gradient(circle, rgba(124,58,237,0.14) 0%, rgba(124,58,237,0) 70%)",
+          }}
+        />
+        <div
+          className="bg-drift-2 absolute top-1/3 right-0 h-[400px] w-[500px] rounded-full"
+          style={{
+            background:
+              "radial-gradient(circle, rgba(6,182,212,0.12) 0%, rgba(6,182,212,0) 70%)",
+          }}
+        />
+        <div
+          className="bg-drift-3 absolute bottom-0 left-[-10%] h-[500px] w-[600px] rounded-full"
+          style={{
+            background:
+              "radial-gradient(circle, rgba(212,168,83,0.10) 0%, rgba(212,168,83,0) 70%)",
+          }}
+        />
       </div>
 
       {/* Hero Section */}

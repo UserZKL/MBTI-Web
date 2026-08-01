@@ -41,6 +41,7 @@ export interface MbtiResult {
     left: { dimension: Dimension; score: number; percentage: number }
     right: { dimension: Dimension; score: number; percentage: number }
     dominant: Dimension
+    isEdge: boolean
   }[]
 }
 
@@ -185,6 +186,8 @@ export function calculateResult(answers: Answer[]): MbtiResult | null {
 
   const dimensions = DIMENSION_PAIRS.map(([left, right]) => {
     const pairCode: DimensionPair = `${left}${right}` as DimensionPair
+    const dominant = scores[left] >= scores[right] ? left : right
+    const dominantPct = percentages[dominant]
     return {
       code: pairCode,
       left: {
@@ -197,7 +200,8 @@ export function calculateResult(answers: Answer[]): MbtiResult | null {
         score: scores[right],
         percentage: percentages[right],
       },
-      dominant: scores[left] >= scores[right] ? left : right,
+      dominant,
+      isEdge: dominantPct < 55,
     }
   })
 

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useRef, useEffect } from "react"
+import { useState, useRef, useEffect, useMemo } from "react"
 import { useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { GradientText } from "@/components/shared/gradient-text"
@@ -23,16 +23,18 @@ export function ResultPage() {
   const searchParams = useSearchParams()
   const dataParam = searchParams.get("data")
 
-  let result: MbtiResult | null = null
-  let rawAnswers: Answer[] = []
-  if (dataParam) {
+  const parsed = useMemo(() => {
+    if (!dataParam) return { result: null as MbtiResult | null, rawAnswers: [] as Answer[] }
     try {
-      rawAnswers = JSON.parse(atob(dataParam))
-      result = calculateResult(rawAnswers)
+      const rawAnswers: Answer[] = JSON.parse(atob(dataParam))
+      return { result: calculateResult(rawAnswers), rawAnswers }
     } catch {
-      // invalid data
+      return { result: null, rawAnswers: [] }
     }
-  }
+  }, [dataParam])
+
+  const result = parsed.result
+  const rawAnswers = parsed.rawAnswers
 
   const [saveState, setSaveState] = useState<"idle" | "loading" | "saved" | "error">("idle")
   const [reportState, setReportState] = useState<"idle" | "loading" | "done" | "error">("idle")
@@ -173,11 +175,15 @@ export function ResultPage() {
   const confidenceLabel =
     result.confidence >= 70 ? "高度确定" : result.confidence >= 40 ? "比较确定" : "边缘型"
 
+  const edgeDims = result.dimensions
+    .filter((d) => d.isEdge)
+    .map((d) => `${d.left.dimension} / ${d.right.dimension}`)
+
   return (
     <div className="relative min-h-screen overflow-x-clip pb-24">
       <div className="pointer-events-none fixed inset-0 -z-10">
-        <div className="absolute -top-20 right-0 h-[500px] w-[500px] rounded-full bg-[var(--color-brand-purple)]/3 blur-[120px]" />
-        <div className="absolute bottom-0 left-0 h-[400px] w-[400px] rounded-full bg-[var(--color-brand-cyan)]/3 blur-[100px]" />
+        <div className="absolute -top-20 right-0 h-[500px] w-[500px] rounded-full bg-[radial-gradient(circle,rgba(124,58,237,0.07)_0%,rgba(124,58,237,0)_70%)]" />
+        <div className="absolute bottom-0 left-0 h-[400px] w-[400px] rounded-full bg-[radial-gradient(circle,rgba(6,182,212,0.07)_0%,rgba(6,182,212,0)_70%)]" />
       </div>
 
       <div className="mx-auto max-w-4xl px-4 pt-10 lg:max-w-5xl">
@@ -198,6 +204,12 @@ export function ResultPage() {
               <span className="ml-2 text-[var(--color-error)]">· 保存失败</span>
             )}
           </p>
+          {edgeDims.length > 0 && (
+            <p className="mx-auto mt-3 max-w-xl text-sm leading-relaxed text-[var(--color-brand-amber)] animate-fade-up animation-delay-400">
+              你的 {edgeDims.join("、")} 维度接近中间值，这一维度的倾向不够明显，
+              建议结合生活经验判断或重新测试确认。
+            </p>
+          )}
           {saveState === "error" && (
             <p className="mt-2 text-xs text-[var(--color-error)]">
               结果保存失败，登录后可重试保存到个人中心

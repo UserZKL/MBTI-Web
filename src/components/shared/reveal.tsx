@@ -26,7 +26,7 @@ export function Reveal({
       ref={ref}
       style={delay ? { transitionDelay: `${delay}ms` } : undefined}
       className={cn(
-        "transition-all duration-700 ease-out will-change-transform motion-reduce:transition-none",
+        "transition-all duration-700 ease-out motion-reduce:transition-none",
         inView
           ? "translate-x-0 translate-y-0 opacity-100"
           : direction === "left"

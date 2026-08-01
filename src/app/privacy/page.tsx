@@ -45,7 +45,7 @@ export default function PrivacyPage() {
   return (
     <div className="relative min-h-screen overflow-x-clip">
       <div className="pointer-events-none fixed inset-0 -z-10">
-        <div className="absolute top-0 right-0 h-[400px] w-[400px] rounded-full bg-[var(--color-brand-cyan)]/3 blur-[100px]" />
+        <div className="absolute top-0 right-0 h-[400px] w-[400px] rounded-full bg-[radial-gradient(circle,rgba(6,182,212,0.07)_0%,rgba(6,182,212,0)_70%)]" />
       </div>
 
       <div className="mx-auto max-w-2xl px-4 py-10">
