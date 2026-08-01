@@ -13,9 +13,10 @@ import { calculateResult, getPersonalityTypeData, type Answer } from "@/lib/mbti
 import { type MbtiResult } from "@/lib/mbti-utils"
 import { drawResultCard, downloadDataUrl } from "@/lib/export-card"
 import { PersonAvatar } from "@/components/shared/person-avatar"
-import { writeLocalHistory } from "@/lib/local-history"
+import { writeLocalHistory, readLocalHistory, updateLocalHistoryReport } from "@/lib/local-history"
+import { buildPageHtml, downloadPageHtml } from "@/lib/save-page"
 import {
-  Share2, RefreshCw, Users, Briefcase, Heart, TrendingUp,
+  FileDown, RefreshCw, Users, Briefcase, Heart, TrendingUp,
   Sparkles, Loader2, ImageDown
 } from "lucide-react"
 
@@ -41,6 +42,7 @@ export function ResultPage() {
   const [reportText, setReportText] = useState<string | null>(null)
   const [showReport, setShowReport] = useState(false)
   const autoSaved = useRef(false)
+  const savedResultIdRef = useRef<string | null>(null)
   const rawAnswersRef = useRef(rawAnswers)
   const resultRef = useRef(result)
 
@@ -53,7 +55,7 @@ export function ResultPage() {
 
   const typeData = result ? getPersonalityTypeData(result.type) : null
 
-  const doSave = async (report?: string) => {
+  const doSave = async () => {
     const r = resultRef.current
     if (!r || saveState === "loading") return
     setSaveState("loading")
@@ -64,16 +66,31 @@ export function ResultPage() {
         answers: rawAnswersRef.current,
         isPublic: false,
       }
-      if (report) body.report = report
       const res = await fetch("/api/result/save", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       })
       if (!res.ok) throw new Error("Save failed")
+      const data = await res.json()
+      savedResultIdRef.current = (data as { id?: string }).id ?? null
       setSaveState("saved")
     } catch {
       setSaveState("error")
+    }
+  }
+
+  const patchReport = async (report: string) => {
+    const id = savedResultIdRef.current
+    if (!id) return
+    try {
+      await fetch(`/api/result/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ report }),
+      })
+    } catch {
+      // 报告已写入 localStorage，服务端更新失败不影响本地回看
     }
   }
 
@@ -94,6 +111,14 @@ export function ResultPage() {
         typeName: resultRef.current.typeName,
         data: dataParam,
       })
+      const entry = readLocalHistory().find((h) => h.data === dataParam)
+      if (entry?.report) {
+        setTimeout(() => {
+          setReportText(entry?.report ?? null)
+          setReportState("done")
+          setShowReport(true)
+        }, 0)
+      }
     }
   }, [dataParam])
 
@@ -127,15 +152,28 @@ export function ResultPage() {
       const data = await res.json()
       setReportText(data.report)
       setReportState("done")
-      if (saveState === "saved") {
-        doSave(data.report)
-      }
+      updateLocalHistoryReport(dataParam ?? "", data.report)
+      patchReport(data.report)
     } catch {
       setReportState("error")
     }
   }
 
   const [downloadState, setDownloadState] = useState<"idle" | "loading" | "done" | "error">("idle")
+  const [savePageState, setSavePageState] = useState<"idle" | "loading" | "done" | "error">("idle")
+
+  const handleSavePage = async () => {
+    if (!result) return
+    setSavePageState("loading")
+    try {
+      const html = await buildPageHtml()
+      const date = new Date().toISOString().slice(0, 10)
+      downloadPageHtml(html, `mbti-result-${result.type}-${date}.html`)
+      setSavePageState("done")
+    } catch {
+      setSavePageState("error")
+    }
+  }
 
   const handleDownloadImage = async () => {
     if (!result) return
@@ -413,15 +451,20 @@ export function ResultPage() {
           <GradientLink href="/test" glow className="px-8 py-3.5 text-base">
             再测一次
           </GradientLink>
-          <GradientLink
-            href={`/share/${result.type}`}
+          <GradientButton
             gradient="gold"
             glow
+            onClick={handleSavePage}
+            disabled={savePageState === "loading"}
             className="flex items-center gap-2 px-8 py-3.5 text-base"
           >
-            <Share2 className="size-5" />
-            分享结果
-          </GradientLink>
+            {savePageState === "loading" ? (
+              <Loader2 className="size-5 animate-spin" aria-hidden="true" />
+            ) : (
+              <FileDown className="size-5" aria-hidden="true" />
+            )}
+            {savePageState === "loading" ? "保存中..." : "保存页面"}
+          </GradientButton>
           <GradientButton
             variant="outline"
             onClick={handleDownloadImage}
@@ -438,6 +481,11 @@ export function ResultPage() {
           {downloadState === "error" && (
             <p className="w-full text-center text-sm text-[var(--color-error)]">
               图片生成失败，请重试
+            </p>
+          )}
+          {savePageState === "error" && (
+            <p className="w-full text-center text-sm text-[var(--color-error)]">
+              页面保存失败，请重试
             </p>
           )}
         </section>

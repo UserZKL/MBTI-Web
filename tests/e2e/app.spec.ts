@@ -263,3 +263,60 @@ test.describe("Flow 5: Responsive Breakpoints", () => {
     }
   }
 })
+
+test.describe("Flow 10: Save Page & AI Report Persistence", () => {
+  const b64 = (() => {
+    const answers = Array.from({ length: 72 }, (_, i) => ({
+      questionId: i + 1,
+      answer: "agree" as const,
+    }))
+    return Buffer.from(JSON.stringify(answers)).toString("base64")
+  })()
+  const dataUrl = encodeURIComponent(b64)
+
+  test("should show previously generated AI report when revisiting result page", async ({ page }) => {
+    await page.addInitScript(({ data, report }) => {
+      localStorage.setItem(
+        "mbti-history",
+        JSON.stringify([
+          {
+            typeCode: "ISTJ",
+            typeName: "建筑师",
+            createdAt: new Date().toISOString(),
+            data,
+            report,
+          },
+        ])
+      )
+    }, { data: b64, report: "这是一段已生成的 AI 深度分析报告内容，用于回看测试。" })
+
+    await page.goto(`/result?data=${dataUrl}`)
+    await expect(page.getByText("这是一段已生成的 AI 深度分析报告内容")).toBeVisible({
+      timeout: 15000,
+    })
+    await expect(page.getByRole("button", { name: /生成 AI 报告/ })).not.toBeVisible()
+  })
+
+  test("should download result page as static HTML file", async ({ page }) => {
+    await page.goto(`/result?data=${dataUrl}`)
+    await expect(page.locator("h1")).toBeVisible({ timeout: 15000 })
+
+    const [download] = await Promise.all([
+      page.waitForEvent("download"),
+      page.getByRole("button", { name: /保存页面/ }).click(),
+    ])
+
+    expect(download.suggestedFilename()).toContain("mbti-result-")
+    await download.saveAs("test-results/flow10.html")
+    const stream = await download.createReadStream()
+    const chunks: Buffer[] = []
+    for await (const chunk of stream) {
+      chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk))
+    }
+    const content = Buffer.concat(chunks).toString("utf8")
+
+    expect(content).toContain("物流师")
+    expect(content).toContain("AI 深度分析")
+    expect(content).toContain("<style")
+  })
+})

@@ -303,3 +303,37 @@ ew PrismaLibSql({ url })（adapter 内部自建 client）→ 所有保存请求 
 | build | ✅ 43 routes（严格 TS）+ Proxy(Middleware) |
 | E2E | ✅ 55/55（59s） |
 | Git | V6 commit |
+
+---
+
+## V7 报告（USER_FEEDBACK5）
+
+### 需求
+1. 结果页底部「分享」按钮改为「保存页面」：点击下载该页完整静态 HTML（含内联样式），格式与「下载图片」一致
+2. AI 生成的分析内容持久化：测试 → AI 分析 → 回首页 → 从历史人格页面回看时，直接显示已生成的报告内容，而非「生成 AI 报告」按钮
+
+### 实现
+- **src/lib/save-page.ts（新）**：`buildPageHtml()`——clone document.documentElement → head 中 `link[rel=stylesheet]` fetch 内联为 `<style>`（CSS 内 `url()` 相对路径改写为 `window.location.origin` 绝对路径）→ 删除全部 script → 返回完整 `<!DOCTYPE html>`；`downloadPageHtml(html, filename)`——Blob `text/html;charset=utf-8` + a.download 下载
+- **result-page.tsx**：「分享结果」GradientLink →「保存页面」GradientButton（gold 胶囊，FileDown 图标，loading「保存中...」，错误提示「页面保存失败，请重试」）；文件名 `mbti-result-${type}-${date}.html`
+- **AI 报告持久化**：
+  - `local-history.ts`：LocalHistoryItem 加 `report?`；writeLocalHistory 去重时保留旧 report；新增 `updateLocalHistoryReport(data, report)`
+  - 结果页挂载时读本地历史，同 data 条目有 report → 直接显示报告（setTimeout 异步，规避 set-state-in-effect lint）
+  - 生成报告成功 → 写 localStorage + `PATCH /api/result/[id]` 同步到服务器记录
+- **src/app/api/result/[id]/route.ts**：新增 PATCH handler——auth 无 session→401；zod `{report: string 1-20000}`→400；仅本人记录（findFirst id+userId）→404；更新→`{ok:true}`
+
+### E2E Flow 10（+2，共 57）
+- 报告回看：addInitScript 种 localStorage（含 report）→ 打开 /result → 断言报告可见 + 「生成 AI 报告」按钮不出现 ✅
+- 保存页面：点击 → 下载 → suggestedFilename 含 mbti-result- → 文件内容断言（UTF-8 解码：含类型名「物流师」/「AI 深度分析」/`<style`）✅
+
+### 排障记录
+- 下载 HTML 中文断言失败：①读取方式 `new Response(nodeStream).text()` 中文乱码 → 改 `for await` 收集 chunks + Buffer.concat + toString("utf8")；②断言「建筑师」失败——根因：全 agree → ISTJ 的中文名是「物流师」（非「建筑师」，后者是 INTJ），且文件本身严格 UTF-8 无 BOM 正常
+
+### 验证
+| 项 | 结果 |
+|---|---|
+| typecheck | ✅ |
+| lint | ✅ 0 errors 0 warnings |
+| test | ✅ 86/86 |
+| build | ✅ 43 routes（严格 TS）+ Proxy(Middleware) |
+| E2E | ✅ 57/57（1.4m） |
+| Git | V7 commit |
