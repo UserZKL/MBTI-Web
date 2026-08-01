@@ -128,7 +128,7 @@ export function LandingPage() {
                   {t.name}
                 </h3>
                 <p className="line-clamp-2 text-xs leading-relaxed text-[var(--color-text-tertiary)]">
-                  {t.description.slice(0, 80)}...
+                  {t.description.length > 80 ? `${t.description.slice(0, 80)}...` : t.description}
                 </p>
               </GlassCard>
             </Link>

@@ -203,7 +203,14 @@ export function LoginPageClient() {
         )}
 
         <p className="mt-6 text-center text-sm text-[var(--color-text-tertiary)]">
-          登录即表示同意服务条款和隐私政策
+          登录即表示同意{" "}
+          <Link href="/terms" className="text-[var(--color-text-secondary)] underline underline-offset-3 hover:text-white">
+            服务条款
+          </Link>{" "}
+          和{" "}
+          <Link href="/privacy" className="text-[var(--color-text-secondary)] underline underline-offset-3 hover:text-white">
+            隐私政策
+          </Link>
         </p>
       </GlassCard>
 

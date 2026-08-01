@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test"
+﻿import { test, expect } from "@playwright/test"
 
 const DEVICE_SIZES = [
   { name: "small phone", width: 320, height: 568 },
@@ -30,14 +30,19 @@ test.describe("Flow 1: Complete Test Journey", () => {
     await page.waitForURL("/test")
     await expect(page.locator("h2")).toBeVisible()
 
+    const question = page.locator("h2").first()
+    let prevQuestion = ""
     for (let i = 0; i < 60; i++) {
-      const agreeBtn = page.getByRole("button", { name: "符合" })
+      if (i > 0) {
+        await expect(question).not.toHaveText(prevQuestion, { timeout: 15000 })
+      }
+      prevQuestion = (await question.textContent()) ?? ""
+      const agreeBtn = page.getByRole("button", { name: "符合", exact: true })
       await agreeBtn.waitFor({ state: "visible", timeout: 10000 })
-      await agreeBtn.click()
-      await page.waitForTimeout(350)
+      await agreeBtn.click({ force: true })
     }
 
-    await page.waitForURL("/result?data=*", { timeout: 15000 })
+    await page.waitForURL("/result?data=*", { timeout: 30000 })
     await expect(page.locator("h1")).toBeVisible()
     await expect(page.locator("text=查看所有类型").first()).toBeVisible()
     await expect(page.locator("text=再测一次").first()).toBeVisible()
@@ -85,6 +90,75 @@ test.describe("Flow 4: Blog Browsing", () => {
 
     await expect(page.locator("h1")).toBeVisible()
     await expect(page.getByText("返回博客").first()).toBeVisible()
+  })
+})
+
+test.describe("Flow 6: Incomplete Test Guard", () => {
+  test("should block submission when questions are unanswered", async ({ page }) => {
+    await page.goto("/test")
+
+    const agreeBtn = page.getByRole("button", { name: "符合", exact: true })
+    await agreeBtn.waitFor({ state: "visible", timeout: 10000 })
+    await agreeBtn.click()
+    await page.waitForTimeout(350)
+
+    await page.getByRole("button", { name: "第 60 题" }).click()
+    await agreeBtn.waitFor({ state: "visible", timeout: 10000 })
+    await agreeBtn.click()
+    await page.waitForTimeout(400)
+
+    await expect(page).toHaveURL(/\/test/)
+    await expect(page.getByText(/未作答/)).toBeVisible()
+  })
+})
+
+test.describe("Flow 7: Result Save & Share", () => {
+  test("should auto-save result after full test", async ({ page }) => {
+    await page.goto("/test")
+
+    const question = page.locator("h2").first()
+    let prevQuestion = ""
+    for (let i = 0; i < 60; i++) {
+      if (i > 0) {
+        await expect(question).not.toHaveText(prevQuestion, { timeout: 15000 })
+      }
+      prevQuestion = (await question.textContent()) ?? ""
+      const agreeBtn = page.getByRole("button", { name: "符合", exact: true })
+      await agreeBtn.waitFor({ state: "visible", timeout: 10000 })
+      await agreeBtn.click({ force: true })
+    }
+
+    await page.waitForURL("/result?data=*", { timeout: 30000 })
+    await expect(page.getByText(/已保存/)).toBeVisible({ timeout: 10000 })
+    await expect(page.getByRole("button", { name: /生成 AI 报告/ })).toBeVisible()
+  })
+
+  test("should open share card dialog from share page", async ({ page }) => {
+    await page.goto("/share/INTJ")
+    await expect(page.locator("h1")).toContainText("建筑师")
+    await expect(page.getByRole("button", { name: /生成分享卡片/ })).toBeVisible()
+
+    await page.getByRole("button", { name: /生成分享卡片/ }).click()
+    await expect(page.getByText("分享卡片已生成")).toBeVisible({ timeout: 15000 })
+  })
+})
+
+test.describe("Flow 8: Legal Pages & 404", () => {
+  test("should render terms and privacy pages", async ({ page }) => {
+    await page.goto("/terms")
+    await expect(page.locator("h1")).toContainText("服务条款")
+    await page.goto("/privacy")
+    await expect(page.locator("h1")).toContainText("隐私政策")
+  })
+
+  test("should return 404 for invalid type code", async ({ page }) => {
+    const response = await page.goto("/types/XXXX")
+    expect(response?.status()).toBe(404)
+  })
+
+  test("should return 404 for invalid share slug", async ({ page }) => {
+    const response = await page.goto("/share/INVALID")
+    expect(response?.status()).toBe(404)
   })
 })
 

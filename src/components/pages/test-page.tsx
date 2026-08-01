@@ -172,15 +172,6 @@ export function TestPage() {
       {/* Header */}
       <div className="w-full max-w-2xl pt-8">
         <div className="mb-2 flex items-center justify-between">
-          <button
-            onClick={handleGoBack}
-            disabled={currentIndex === 0}
-            aria-label="上一题"
-            className="flex items-center gap-1 text-sm text-[var(--color-text-tertiary)] transition-colors hover:text-white disabled:opacity-20"
-          >
-            <ChevronLeft className="size-4" aria-hidden="true" />
-            上一题
-          </button>
           <span className="text-sm tabular-nums text-[var(--color-text-tertiary)]">
             {currentIndex + 1} / {questions.length}
           </span>

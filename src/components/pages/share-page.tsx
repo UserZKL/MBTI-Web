@@ -104,7 +104,7 @@ export function SharePageClient({
             ) : (
               <Share2 className="size-4" aria-hidden="true" />
             )}
-            {isGenerating ? "生成中..." : "分享到微信"}
+            {isGenerating ? "生成中..." : "生成分享卡片"}
           </GradientButton>
           {error && <p className="text-xs text-[var(--color-error)]">{error}</p>}
         </div>

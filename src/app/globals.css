@@ -9,7 +9,7 @@
   --font-sans: var(--font-sans-custom, var(--font-geist-sans));
   --font-mono: var(--font-geist-mono);
   --font-display: var(--font-display-custom, var(--font-geist-sans));
-  --font-body: var(--font-body-custom, var(--font-geist-sans));
+  --font-body: var(--font-sans-custom, var(--font-geist-sans));
 
   --text-xs: 0.875rem;
   --text-xs--line-height: 1.5;

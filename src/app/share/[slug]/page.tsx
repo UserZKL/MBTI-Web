@@ -1,3 +1,4 @@
+import { notFound } from "next/navigation"
 import { SharePageClient } from "@/components/pages/share-page"
 import { getPersonalityTypeData, getAllPersonalityTypes } from "@/lib/mbti-utils"
 
@@ -26,12 +27,16 @@ export default async function SharePage({
   const typeData = getPersonalityTypeData(code)
   const t = getAllPersonalityTypes().find((x) => x.code === code)
 
+  if (!typeData || !t) {
+    notFound()
+  }
+
   return (
     <SharePageClient
       typeCode={code}
-      typeName={t?.name ?? code}
-      description={typeData?.description ?? "MBTI 人格类型"}
-      strengths={typeData?.strengths ?? []}
+      typeName={t.name}
+      description={typeData.description}
+      strengths={typeData.strengths}
     />
   )
 }

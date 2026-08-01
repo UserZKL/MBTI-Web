@@ -4,12 +4,10 @@ let clientPromise: Promise<any> | null = null
 async function createPrismaClient() {
   const prismaModule: any = await import(/* webpackIgnore: true */ "@prisma/client")
   const adapterModule: any = await import(/* webpackIgnore: true */ "@prisma/adapter-libsql")
-  const libsqlModule: any = await import(/* webpackIgnore: true */ "@libsql/client")
 
   const url = process.env.DATABASE_URL || "file:./dev.db"
 
-  const libsql = libsqlModule.createClient({ url })
-  const adapter = new adapterModule.PrismaLibSql(libsql)
+  const adapter = new adapterModule.PrismaLibSql({ url })
   return new prismaModule.PrismaClient({ adapter })
 }
 

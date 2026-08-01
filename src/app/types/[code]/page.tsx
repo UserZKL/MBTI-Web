@@ -1,4 +1,5 @@
 import type { Metadata } from "next"
+import { notFound } from "next/navigation"
 import { TypeDetailPage } from "@/components/pages/type-detail-page"
 import { getAllPersonalityTypes, getPersonalityTypeData } from "@/lib/mbti-utils"
 
@@ -26,5 +27,9 @@ export default async function TypeDetailRoute({
   params: Promise<{ code: string }>
 }) {
   const { code } = await params
-  return <TypeDetailPage code={code.toUpperCase()} />
+  const upper = code.toUpperCase()
+  if (!getPersonalityTypeData(upper)) {
+    notFound()
+  }
+  return <TypeDetailPage code={upper} />
 }

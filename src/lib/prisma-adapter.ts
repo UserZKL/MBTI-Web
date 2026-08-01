@@ -27,5 +27,8 @@ export function lazyPrismaAdapter() {
           return method(...args)
         })
     },
+    has() {
+      return true
+    },
   })
 }

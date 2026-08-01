@@ -3,12 +3,13 @@ import { getAllPersonalityTypes } from "@/lib/mbti-utils"
 import { getAllPosts } from "@/content/blog"
 
 const BASE = process.env.NEXT_PUBLIC_APP_URL ?? "https://mbti-test.example.com"
+const LAST_MOD = "2026-08-01"
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const types = getAllPersonalityTypes()
   const typePages: MetadataRoute.Sitemap = types.map((t) => ({
     url: `${BASE}/types/${t.code}`,
-    lastModified: new Date(),
+    lastModified: LAST_MOD,
     changeFrequency: "monthly",
     priority: 0.7,
   }))
@@ -16,7 +17,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const posts = getAllPosts()
   const blogPages: MetadataRoute.Sitemap = posts.map((p) => ({
     url: `${BASE}/blog/${p.slug}`,
-    lastModified: new Date(),
+    lastModified: LAST_MOD,
     changeFrequency: "monthly",
     priority: 0.6,
   }))
@@ -24,25 +25,37 @@ export default function sitemap(): MetadataRoute.Sitemap {
   return [
     {
       url: BASE,
-      lastModified: new Date(),
+      lastModified: LAST_MOD,
       changeFrequency: "weekly",
       priority: 1,
     },
     {
       url: `${BASE}/test`,
-      lastModified: new Date(),
+      lastModified: LAST_MOD,
       changeFrequency: "weekly",
       priority: 0.9,
     },
     {
       url: `${BASE}/types`,
-      lastModified: new Date(),
+      lastModified: LAST_MOD,
       changeFrequency: "weekly",
       priority: 0.8,
     },
     {
+      url: `${BASE}/compare`,
+      lastModified: LAST_MOD,
+      changeFrequency: "monthly",
+      priority: 0.6,
+    },
+    {
+      url: `${BASE}/stats`,
+      lastModified: LAST_MOD,
+      changeFrequency: "monthly",
+      priority: 0.5,
+    },
+    {
       url: `${BASE}/blog`,
-      lastModified: new Date(),
+      lastModified: LAST_MOD,
       changeFrequency: "weekly",
       priority: 0.8,
     },

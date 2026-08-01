@@ -4,7 +4,7 @@ import { GradientButton, GradientLink } from "@/components/shared/gradient-butto
 import { GlassCard } from "@/components/shared/glass-card"
 import { TypeBadge } from "@/components/shared/type-badge"
 import { getPersonalityTypeData, getAllPersonalityTypes } from "@/lib/mbti-utils"
-import { TrendingUp, Briefcase, Heart, Users, ArrowLeft } from "lucide-react"
+import { TrendingUp, Briefcase, Heart, Users, ArrowLeft, AlertTriangle } from "lucide-react"
 
 interface TypeDetailPageProps {
   code: string
@@ -93,7 +93,7 @@ export function TypeDetailPage({ code }: TypeDetailPageProps) {
           </GlassCard>
           <GlassCard variant="subtle" className="p-5">
             <div className="mb-3 flex items-center gap-2">
-              <span className="text-xs">⚠</span>
+              <AlertTriangle className="size-4 text-[var(--color-brand-amber)]" />
               <h2 className="text-sm font-semibold text-[var(--color-text-primary)]">待成长</h2>
             </div>
             <ul className="space-y-1.5">
