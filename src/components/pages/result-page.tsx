@@ -93,7 +93,9 @@ export function ResultPage() {
           typeCode: result.type,
           typeData: typeData ? {
             name: typeData.name,
+            nickname: typeData.nickname,
             description: typeData.description,
+            traits: typeData.traits,
             strengths: typeData.strengths,
             weaknesses: typeData.weaknesses,
             careers: typeData.careers,
@@ -177,7 +179,18 @@ export function ResultPage() {
           <p className="mt-3 text-xs text-[var(--color-text-tertiary)]">
             置信度：{result.confidence}% · {confidenceLabel}
             {saveState === "saved" && <span className="ml-2 text-[var(--color-success)]">· 已保存</span>}
+            {saveState === "error" && (
+              <span className="ml-2 text-[var(--color-error)]">· 保存失败</span>
+            )}
           </p>
+          {saveState === "error" && (
+            <p className="mt-2 text-xs text-[var(--color-error)]">
+              结果保存失败，登录后可重试保存到个人中心
+              <Link href="/login" className="ml-1 text-[var(--color-brand-cyan)] underline">
+                去登录
+              </Link>
+            </p>
+          )}
         </section>
 
         {/* Dimension Scores */}

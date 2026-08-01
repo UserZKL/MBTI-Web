@@ -33,10 +33,11 @@ export async function GET() {
     })
 
     const dimensionCounts: Record<string, number> = { E: 0, I: 0, S: 0, N: 0, T: 0, F: 0, J: 0, P: 0 }
-    for (const t of recentTests) {
-      if (t.typeCode && t.typeCode.length === 4) {
-        for (const ch of t.typeCode) {
-          dimensionCounts[ch] = (dimensionCounts[ch] || 0) + 1
+    for (const entry of typeDistribution) {
+      if (entry.typeCode && entry.typeCode.length === 4) {
+        const count = entry._count._all
+        for (const ch of entry.typeCode) {
+          dimensionCounts[ch] = (dimensionCounts[ch] || 0) + count
         }
       }
     }

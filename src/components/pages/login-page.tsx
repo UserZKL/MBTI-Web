@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 import Link from "next/link"
+import { useSearchParams } from "next/navigation"
 import { signIn } from "next-auth/react"
 import { GradientText } from "@/components/shared/gradient-text"
 import { GlassCard } from "@/components/shared/glass-card"
@@ -19,6 +20,17 @@ export function LoginPageClient() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [cooldown, setCooldown] = useState(0)
+
+  const searchParams = useSearchParams()
+  const urlError =
+    searchParams.get("error") === "Verification"
+      ? "验证码无效或已过期，请重新获取"
+      : searchParams.get("error") === "Configuration"
+        ? "登录服务未配置完成，请联系管理员"
+        : searchParams.get("error")
+          ? "登录失败，请重试"
+          : null
+  const displayError = error ?? urlError
 
   const cooldownActive = cooldown > 0
 
@@ -186,8 +198,8 @@ export function LoginPageClient() {
           </form>
         )}
 
-        {error && (
-          <p className="mt-4 text-center text-sm text-[var(--color-error)]">{error}</p>
+        {displayError && (
+          <p className="mt-4 text-center text-sm text-[var(--color-error)]">{displayError}</p>
         )}
 
         <p className="mt-6 text-center text-sm text-[var(--color-text-tertiary)]">

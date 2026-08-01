@@ -7,6 +7,13 @@ import { GradientLink } from "@/components/shared/gradient-button"
 import { GlassCard } from "@/components/shared/glass-card"
 import { TypeBadge } from "@/components/shared/type-badge"
 import { Button } from "@/components/ui/button"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 import { History, Settings, LogOut, TrendingUp, TestTube, ChevronRight, Loader2 } from "lucide-react"
 
 interface UserInfo {
@@ -20,6 +27,14 @@ interface HistoryEntry {
   typeCode: string
   createdAt: string
   isPublic: boolean
+}
+
+interface ResultDetail {
+  id: string
+  typeCode: string
+  scores: Record<string, number>
+  report?: string | null
+  createdAt: string
 }
 
 interface ProfileClientProps {
@@ -36,20 +51,45 @@ const TYPE_NAMES: Record<string, string> = {
 export function ProfileClient({ user }: ProfileClientProps) {
   const [history, setHistory] = useState<HistoryEntry[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [total, setTotal] = useState(0)
+  const [selectedId, setSelectedId] = useState<string | null>(null)
+  const [detail, setDetail] = useState<ResultDetail | null>(null)
+  const [detailLoading, setDetailLoading] = useState(false)
+  const [detailError, setDetailError] = useState<string | null>(null)
 
   useEffect(() => {
     if (user) {
       fetch("/api/profile/history?limit=20")
-        .then((r) => r.json())
+        .then(async (r) => {
+          if (!r.ok) throw new Error(`HTTP ${r.status}`)
+          return r.json()
+        })
         .then((data) => {
           setHistory(data.results ?? [])
           setTotal(data.total ?? 0)
         })
-        .catch(() => {})
+        .catch(() => setError("加载测试记录失败，请稍后重试"))
         .finally(() => setLoading(false))
     }
   }, [user])
+
+  const handleOpenDetail = async (id: string) => {
+    setSelectedId(id)
+    setDetail(null)
+    setDetailError(null)
+    setDetailLoading(true)
+    try {
+      const res = await fetch(`/api/result/${id}`)
+      if (!res.ok) throw new Error(`HTTP ${res.status}`)
+      const data = (await res.json()) as ResultDetail
+      setDetail(data)
+    } catch {
+      setDetailError("加载详情失败，请稍后重试")
+    } finally {
+      setDetailLoading(false)
+    }
+  }
 
   const uniqueTypes = new Set(history.map((h) => h.typeCode)).size
   const typeChanges = history.length > 1
@@ -142,6 +182,8 @@ export function ProfileClient({ user }: ProfileClientProps) {
               <div className="flex justify-center py-8">
                 <Loader2 className="size-5 animate-spin text-[var(--color-text-secondary)]" />
               </div>
+            ) : error ? (
+              <p className="py-8 text-center text-sm text-red-400">{error}</p>
             ) : history.length === 0 ? (
               <p className="py-8 text-center text-sm text-[var(--color-text-tertiary)]">
                 暂无测试记录
@@ -150,20 +192,27 @@ export function ProfileClient({ user }: ProfileClientProps) {
               <ul className="space-y-2">
                 {history.map((entry) => (
                   <li key={entry.id}>
-                    <GlassCard variant="subtle" hover className="flex items-center justify-between p-4">
-                      <div className="flex items-center gap-3">
-                        <TypeBadge type={entry.typeCode} size="sm" />
-                        <div>
-                          <p className="text-sm text-[var(--color-text-primary)]">
-                            {TYPE_NAMES[entry.typeCode] ?? entry.typeCode}
-                          </p>
-                          <p className="text-xs text-[var(--color-text-tertiary)]">
-                            {new Date(entry.createdAt).toLocaleDateString("zh-CN")}
-                          </p>
+                    <button
+                      type="button"
+                      onClick={() => handleOpenDetail(entry.id)}
+                      className="w-full text-left"
+                      aria-label={`查看 ${TYPE_NAMES[entry.typeCode] ?? entry.typeCode} 测试详情`}
+                    >
+                      <GlassCard variant="subtle" hover className="flex items-center justify-between p-4">
+                        <div className="flex items-center gap-3">
+                          <TypeBadge type={entry.typeCode} size="sm" />
+                          <div>
+                            <p className="text-sm text-[var(--color-text-primary)]">
+                              {TYPE_NAMES[entry.typeCode] ?? entry.typeCode}
+                            </p>
+                            <p className="text-xs text-[var(--color-text-tertiary)]">
+                              {new Date(entry.createdAt).toLocaleDateString("zh-CN")}
+                            </p>
+                          </div>
                         </div>
-                      </div>
-                      <ChevronRight className="size-4 text-[var(--color-text-tertiary)]" />
-                    </GlassCard>
+                        <ChevronRight className="size-4 text-[var(--color-text-tertiary)]" />
+                      </GlassCard>
+                    </button>
                   </li>
                 ))}
               </ul>
@@ -205,6 +254,72 @@ export function ProfileClient({ user }: ProfileClientProps) {
           </GradientLink>
         </section>
       </div>
+
+      {/* Result Detail Dialog */}
+      <Dialog
+        open={selectedId !== null}
+        onOpenChange={(open) => {
+          if (!open) setSelectedId(null)
+        }}
+      >
+        <DialogContent className="max-h-[80vh] overflow-y-auto sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>测试详情</DialogTitle>
+            <DialogDescription>
+              {detail
+                ? `${TYPE_NAMES[detail.typeCode] ?? detail.typeCode} · ${new Date(detail.createdAt).toLocaleDateString("zh-CN")}`
+                : "加载中"}
+            </DialogDescription>
+          </DialogHeader>
+
+          {detailLoading && (
+            <div className="flex justify-center py-8">
+              <Loader2 className="size-5 animate-spin text-[var(--color-text-secondary)]" />
+            </div>
+          )}
+
+          {detailError && (
+            <p className="py-4 text-center text-sm text-red-400">{detailError}</p>
+          )}
+
+          {detail && !detailLoading && (
+            <div className="space-y-4">
+              <div className="flex items-center gap-3">
+                <TypeBadge type={detail.typeCode} size="md" />
+                <span className="text-base font-semibold text-[var(--color-text-primary)]">
+                  {TYPE_NAMES[detail.typeCode] ?? detail.typeCode}
+                </span>
+              </div>
+
+              <div className="space-y-2">
+                {Object.entries(detail.scores ?? {}).map(([dim, score]) => (
+                  <div key={dim} className="flex items-center justify-between rounded-lg bg-white/[0.03] px-4 py-2">
+                    <span className="text-xs text-[var(--color-text-secondary)]">{dim}</span>
+                    <span className="text-sm font-medium text-[var(--color-text-primary)] tabular-nums">
+                      {score}
+                    </span>
+                  </div>
+                ))}
+              </div>
+
+              <div>
+                <p className="mb-2 text-sm font-medium text-[var(--color-text-primary)]">
+                  AI 深度报告
+                </p>
+                {detail.report ? (
+                  <div className="max-h-60 overflow-y-auto whitespace-pre-wrap rounded-lg bg-white/[0.03] p-4 text-xs leading-relaxed text-[var(--color-text-secondary)]">
+                    {detail.report}
+                  </div>
+                ) : (
+                  <p className="text-xs text-[var(--color-text-tertiary)]">
+                    暂无报告，可在结果页点击「生成 AI 报告」
+                  </p>
+                )}
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

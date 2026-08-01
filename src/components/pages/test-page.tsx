@@ -43,6 +43,7 @@ export function TestPage() {
   const [currentIndex, setCurrentIndex] = useState(0)
   const [answers, setAnswers] = useState<Answer[]>([])
   const [isTransitioning, setIsTransitioning] = useState(false)
+  const [incompleteNotice, setIncompleteNotice] = useState(false)
   const [showResume, setShowResume] = useState(() => {
     const existing = loadState()
     return !!(existing && existing.answers.length > 0 && existing.answers.length < questions.length)
@@ -71,12 +72,30 @@ export function TestPage() {
 
   function handleAnswer(answer: "agree" | "disagree") {
     setIsTransitioning(true)
+    setIncompleteNotice(false)
 
-    const newAnswers = [...answers, { questionId: currentQuestion.id, answer }]
+    const existing = answers.find((a) => a.questionId === currentQuestion.id)
+    const newAnswers = existing
+      ? answers.map((a) =>
+          a.questionId === currentQuestion.id
+            ? { questionId: currentQuestion.id, answer }
+            : a
+        )
+      : [...answers, { questionId: currentQuestion.id, answer }]
     setAnswers(newAnswers)
 
     setTimeout(() => {
       if (currentIndex + 1 >= questions.length) {
+        const uniqueCount = new Set(newAnswers.map((a) => a.questionId)).size
+        if (uniqueCount < questions.length) {
+          const answeredSet = new Set(newAnswers.map((a) => a.questionId))
+          const firstUnanswered = questions.findIndex((q) => !answeredSet.has(q.id))
+          setIsTransitioning(false)
+          setCurrentIndex(firstUnanswered >= 0 ? firstUnanswered : currentIndex)
+          saveState(currentIndex, newAnswers)
+          setIncompleteNotice(true)
+          return
+        }
         clearState()
         const encoded = btoa(JSON.stringify(newAnswers))
         router.push(`/result?data=${encoded}`)
@@ -103,14 +122,15 @@ export function TestPage() {
   }
 
   function handleJump(index: number) {
-    const answered = answers.filter((a) => a.questionId === questions[index]?.id)
+    const targetId = questions[index]?.id
     setCurrentIndex(index)
-    if (answered.length > 0) {
-      setAnswers((prev) => prev.slice(0, index))
-      saveState(index, answers.slice(0, index))
-    } else {
-      saveState(index, answers)
+    let updated = answers
+    if (targetId) {
+      const filtered = answers.filter((a) => a.questionId !== targetId)
+      setAnswers(filtered)
+      updated = filtered
     }
+    saveState(index, updated)
     setIsTransitioning(false)
   }
 
@@ -250,7 +270,7 @@ export function TestPage() {
               已答 {answers.length} / {questions.length}
             </span>
           </div>
-          <div className="grid grid-cols-10 gap-1.5 sm:grid-cols-15">
+          <div className="grid grid-cols-5 gap-1.5 sm:grid-cols-10">
             {questions.map((q, i) => {
               const isAnswered = answeredIds.has(q.id)
               const isCurrent = i === currentIndex
@@ -279,6 +299,12 @@ export function TestPage() {
         <p className="mt-6 text-center text-sm text-[var(--color-text-tertiary)]">
           凭第一反应作答，没有对错之分
         </p>
+
+        {incompleteNotice && (
+          <div className="mt-3 w-full rounded-lg border border-[var(--color-brand-amber)]/30 bg-[var(--color-brand-amber)]/10 px-4 py-3 text-center text-sm text-[var(--color-brand-amber)]">
+            还有 {questions.length - new Set(answers.map((a) => a.questionId)).size} 题未作答，已跳转到最近的未答题，请完成全部题目
+          </div>
+        )}
       </div>
     </div>
   )

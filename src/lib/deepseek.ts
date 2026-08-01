@@ -163,6 +163,7 @@ export async function callDeepSeek(input: ReportInput): Promise<ReportOutput> {
       temperature: 0.7,
       max_tokens: 2048,
     }),
+    signal: AbortSignal.timeout(60_000),
   })
 
   if (!response.ok) {

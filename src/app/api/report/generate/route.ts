@@ -79,6 +79,13 @@ export async function POST(request: NextRequest) {
     const message = error instanceof Error ? error.message : "Unknown error"
     console.error("Report generation failed:", message)
 
+    if (error instanceof DOMException && error.name === "TimeoutError") {
+      return NextResponse.json(
+        { error: "AI 服务响应超时，请稍后重试" },
+        { status: 504 }
+      )
+    }
+
     if (message.includes("API key")) {
       return NextResponse.json(
         { error: "AI service not configured" },

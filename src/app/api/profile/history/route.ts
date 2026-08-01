@@ -7,7 +7,11 @@ export const dynamic = "force-dynamic"
 export async function GET(request: NextRequest) {
   try {
     const session = await auth()
-    const userId = session?.user?.id ?? "anonymous"
+    const userId = session?.user?.id
+
+    if (!userId) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
 
     const { searchParams } = new URL(request.url)
     const limit = Math.min(Number(searchParams.get("limit")) || 20, 100)
