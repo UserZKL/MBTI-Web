@@ -272,3 +272,34 @@ ew PrismaLibSql({ url })（adapter 内部自建 client）→ 所有保存请求 
 ### 备注
 - 题库备份：C:\Users\86187\AppData\Local\Temp\opencode\question-bank-backup.json
 - createAnswersForType 测试辅助函数已适配反向计分（reverse 题：target 含维度 → disagree）
+---
+
+## V6 UX 优化报告（用户反馈 3 条）
+
+### 1. 答题按钮选中态修复
+- 根因：两个选项按钮选中样式只判断「该题是否答过」，未区分所选选项 → 无论选哪个，「符合」都变绿
+- 修复：按实际所选答案着色 — 选中的按钮 = 品牌蓝实心白字 + 蓝色光晕，未选中 = 无色描边；加 aria-pressed 辅助语义
+
+### 2. 题库扩至 72 题（准确度）
+- 新增 12 题（id 61-72，全 forward）：线上群聊/排队闲聊/社交软件/外卖配料/认路地标/读书跳细节/策略游戏数值/纠纷摆事实/送礼在意对方/睡前规划/闹钟富余/整理房间被打断 — 场景与既有 60 题零重复
+- 均衡性校验：每维度对 18 题（9:9 左右）、权重差 ≤1、forward 60 + reverse 12、ID 1-72 连续、无重复文本
+- **16 型极端可达验证：16/16 全覆盖**；全「符合」与全「不符合」落在不同类型（ISTJ vs ENFP）
+
+### 3. 分布无偏测试（新增 2 个）
+- 全 agree ≠ 全 disagree 类型
+- 16 种极端答题模式必须达 16 个不同类型
+- 单测更新 60→72：题数/ID/每对 18/forward 60/reject 71 条/72 数组
+
+### 4. 分页与 E2E 适配
+- 做题页 PAGE_SIZE 10→12（6 页 × 12 题）
+- E2E completeTest/Flow 6/localStorage 种值全部适配 72 题
+
+### 验证
+| Check | Result |
+|-------|--------|
+| typecheck | ✅ |
+| lint | ✅ 0 errors 0 warnings |
+| test | ✅ 86/86（+2 分布无偏） |
+| build | ✅ 43 routes（严格 TS）+ Proxy(Middleware) |
+| E2E | ✅ 55/55（59s） |
+| Git | V6 commit |

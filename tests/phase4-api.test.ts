@@ -23,7 +23,7 @@ describe("POST /api/result/save — Zod schema validation", () => {
     const result = saveResultSchema.safeParse({
       typeCode: "IN",
       scores: { E: 10, I: 0, S: 5, N: 10, T: 8, F: 2, J: 7, P: 3 },
-      answers: Array.from({ length: 60 }, (_, i) => ({
+      answers: Array.from({ length: 72 }, (_, i) => ({
         questionId: i + 1,
         answer: "agree" as const,
       })),
@@ -52,7 +52,7 @@ describe("POST /api/result/save — Zod schema validation", () => {
     const result = saveResultSchema.safeParse({
       typeCode: "INTJ",
       scores: { E: 10, I: 0, S: 5, N: 10, T: 8, F: 2, J: 7, P: 3 },
-      answers: Array.from({ length: 60 }, (_, i) => ({
+      answers: Array.from({ length: 72 }, (_, i) => ({
         questionId: i + 1,
         answer: "agree" as const,
       })),

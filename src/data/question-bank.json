@@ -1,7 +1,7 @@
 {
   "version": "1.0",
   "description": "MBTI 人格测试题库 — 60题，生活化风格，中文版",
-  "totalQuestions": 60,
+  "totalQuestions": 72,
   "scaleType": "二元选择（符合/不符合）",
   "dimensions": {
     "EI": {
@@ -500,6 +500,102 @@
       "dimension": "P",
       "direction": "forward",
       "weight": 1,
+      "category": "生活规划"
+    },
+    {
+      "id": 61,
+      "text": "在线上群聊里你常常是带动话题的那个人，冷场时你会主动发消息救场",
+      "dimension": "E",
+      "direction": "forward",
+      "weight": 2,
+      "category": "社交行为"
+    },
+    {
+      "id": 62,
+      "text": "排队或等电梯时，你会自然地跟旁边的人闲聊几句",
+      "dimension": "E",
+      "direction": "forward",
+      "weight": 1,
+      "category": "社交行为"
+    },
+    {
+      "id": 63,
+      "text": "在社交软件上你几乎不主动发起聊天，基本都是别人先来找你",
+      "dimension": "I",
+      "direction": "forward",
+      "weight": 1,
+      "category": "社交行为"
+    },
+    {
+      "id": 64,
+      "text": "点外卖时你会认真查看配料表和每条评价，而不是凭图片和感觉选",
+      "dimension": "S",
+      "direction": "forward",
+      "weight": 1,
+      "category": "信息处理"
+    },
+    {
+      "id": 65,
+      "text": "走新路线时你会留意沿途的地标和店面，方便下次凭记忆认路",
+      "dimension": "S",
+      "direction": "forward",
+      "weight": 2,
+      "category": "信息处理"
+    },
+    {
+      "id": 66,
+      "text": "读书时你常常跳过具体细节描写，急着想知道作者想表达的深层观点",
+      "dimension": "N",
+      "direction": "forward",
+      "weight": 3,
+      "category": "信息处理"
+    },
+    {
+      "id": 67,
+      "text": "玩策略游戏时你喜欢研究数值和机制，而不是跟着感觉乱玩",
+      "dimension": "T",
+      "direction": "forward",
+      "weight": 2,
+      "category": "决策方式"
+    },
+    {
+      "id": 68,
+      "text": "和商家或客服产生纠纷时，你会冷静地摆事实讲道理，而不是先抱怨动气",
+      "dimension": "T",
+      "direction": "forward",
+      "weight": 2,
+      "category": "决策方式"
+    },
+    {
+      "id": 69,
+      "text": "送朋友礼物时，你更在意对方收到时会不会开心，而不是礼物本身值多少钱",
+      "dimension": "F",
+      "direction": "forward",
+      "weight": 1,
+      "category": "决策方式"
+    },
+    {
+      "id": 70,
+      "text": "你每晚睡前会想好第二天要穿什么、先做什么事",
+      "dimension": "J",
+      "direction": "forward",
+      "weight": 2,
+      "category": "生活规划"
+    },
+    {
+      "id": 71,
+      "text": "你的闹钟通常设得比较早，喜欢留出富余时间，而不是卡着点起床",
+      "dimension": "J",
+      "direction": "forward",
+      "weight": 1,
+      "category": "生活规划"
+    },
+    {
+      "id": 72,
+      "text": "整理房间时你常被旧物勾起回忆，停下来发呆半天，最后也没整理完",
+      "dimension": "P",
+      "direction": "forward",
+      "weight": 2,
       "category": "生活规划"
     }
   ]

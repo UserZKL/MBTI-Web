@@ -10,7 +10,7 @@ import { LastResultButton } from "@/components/shared/last-result-button"
 import { getQuestions, type Answer } from "@/lib/mbti-utils"
 
 const STORAGE_KEY = "mbti-test-state"
-const PAGE_SIZE = 10
+const PAGE_SIZE = 12
 const PAGE_COUNT = 6
 
 interface SavedState {
@@ -196,7 +196,10 @@ export function TestPage() {
         <div className="space-y-4">
           {pageQuestions.map((q, idx) => {
             const isAnswered = answeredIds.has(q.id)
+            const currentAnswer = answers.find((a) => a.questionId === q.id)?.answer
             const globalIndex = pageStart + idx
+            const agreeSelected = currentAnswer === "agree"
+            const disagreeSelected = currentAnswer === "disagree"
             return (
               <div
                 key={q.id}
@@ -220,8 +223,11 @@ export function TestPage() {
                     <button
                       onClick={() => handleAnswer(q.id, "agree")}
                       aria-label={`第 ${q.id} 题 符合`}
-                      className={`flex-1 rounded-full border-0 py-5 text-lg font-medium text-white shadow-lg transition-all duration-200 hover:scale-[1.02] hover:shadow-[0_0_30px_rgba(124,58,237,0.3)] active:scale-[0.98] ${
-                        isAnswered ? "bg-[var(--color-success)]/80" : "gradient-primary"
+                      aria-pressed={agreeSelected}
+                      className={`flex-1 rounded-full border py-5 text-lg font-medium transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] ${
+                        agreeSelected
+                          ? "border-[var(--color-brand-blue)] bg-[var(--color-brand-blue)] text-white shadow-lg shadow-blue-500/25"
+                          : "border-white/8 bg-white/[0.02] text-[var(--color-text-secondary)] hover:border-white/15 hover:bg-white/[0.04]"
                       }`}
                     >
                       符合
@@ -229,10 +235,11 @@ export function TestPage() {
                     <button
                       onClick={() => handleAnswer(q.id, "disagree")}
                       aria-label={`第 ${q.id} 题 不符合`}
-                      className={`flex-1 rounded-full border py-5 text-lg font-medium text-[var(--color-text-secondary)] transition-all duration-200 hover:scale-[1.02] hover:border-white/15 hover:bg-white/[0.04] active:scale-[0.98] ${
-                        isAnswered
-                          ? "border-[var(--color-success)]/60 bg-[var(--color-success)]/15"
-                          : "border-white/8 bg-white/[0.02]"
+                      aria-pressed={disagreeSelected}
+                      className={`flex-1 rounded-full border py-5 text-lg font-medium transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] ${
+                        disagreeSelected
+                          ? "border-[var(--color-brand-blue)] bg-[var(--color-brand-blue)] text-white shadow-lg shadow-blue-500/25"
+                          : "border-white/8 bg-white/[0.02] text-[var(--color-text-secondary)] hover:border-white/15 hover:bg-white/[0.04]"
                       }`}
                     >
                       不符合

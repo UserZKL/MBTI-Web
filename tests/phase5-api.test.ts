@@ -59,7 +59,7 @@ const validBody = {
     },
     growth: ["练习表达"],
   },
-  answers: Array.from({ length: 60 }, (_, i) => ({
+  answers: Array.from({ length: 72 }, (_, i) => ({
     questionId: i + 1,
     answer: "agree" as const,
   })),

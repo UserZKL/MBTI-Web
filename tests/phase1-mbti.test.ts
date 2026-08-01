@@ -16,9 +16,9 @@ import {
 } from '@/lib/mbti-utils'
 
 describe('question bank', () => {
-  it('should have exactly 60 questions', () => {
-    expect(getQuestionCount()).toBe(60)
-    expect(getQuestions().length).toBe(60)
+  it('should have exactly 72 questions', () => {
+    expect(getQuestionCount()).toBe(72)
+    expect(getQuestions().length).toBe(72)
   })
 
   it('should have no duplicate question IDs', () => {
@@ -26,9 +26,9 @@ describe('question bank', () => {
     expect(new Set(ids).size).toBe(ids.length)
   })
 
-  it('should have all question IDs from 1 to 60', () => {
+  it('should have all question IDs from 1 to 72', () => {
     const ids = getQuestions().map((q) => q.id).sort((a, b) => a - b)
-    for (let i = 0; i < 60; i++) {
+    for (let i = 0; i < 72; i++) {
       expect(ids[i]).toBe(i + 1)
     }
   })
@@ -39,11 +39,28 @@ describe('question bank', () => {
       counts[q.dimension] = (counts[q.dimension] || 0) + 1
     }
 
-    // Each pair should have ~15 questions
-    expect(counts['E'] + counts['I']).toBe(15)
-    expect(counts['S'] + counts['N']).toBe(15)
-    expect(counts['T'] + counts['F']).toBe(15)
-    expect(counts['J'] + counts['P']).toBe(15)
+    // Each pair should have ~18 questions
+    expect(counts['E'] + counts['I']).toBe(18)
+    expect(counts['S'] + counts['N']).toBe(18)
+    expect(counts['T'] + counts['F']).toBe(18)
+    expect(counts['J'] + counts['P']).toBe(18)
+  })
+
+  it('should have balanced weights per dimension pair', () => {
+    const weights: Record<string, number> = {}
+    for (const q of getQuestions()) {
+      weights[q.dimension] = (weights[q.dimension] || 0) + q.weight
+    }
+    const pairs: [string, string][] = [
+      ['E', 'I'],
+      ['S', 'N'],
+      ['T', 'F'],
+      ['J', 'P'],
+    ]
+    for (const [left, right] of pairs) {
+      const diff = Math.abs((weights[left] || 0) - (weights[right] || 0))
+      expect(diff, `${left}/${right} weight diff should be ≤ 1`).toBeLessThanOrEqual(1)
+    }
   })
 
   it('should have a mix of forward and reverse questions', () => {
@@ -52,7 +69,7 @@ describe('question bank', () => {
     const reverse = questions.filter((q) => q.direction === 'reverse').length
 
     // At least 12 reverse questions (3 per dimension pair)
-    expect(forward).toBe(48)
+    expect(forward).toBe(60)
     expect(reverse).toBe(12)
 
     // Each dimension pair must contain at least 1 reverse question
@@ -177,6 +194,35 @@ describe('type determination', () => {
       expect(determineType(scores)).toBe(type)
     }
   })
+
+  it('should not bias towards a single type for uniform answer patterns', () => {
+    // All-agree and all-disagree patterns must land on different types
+    const allAgree = getQuestions().map((q) => ({ questionId: q.id, answer: 'agree' as const }))
+    const allDisagree = getQuestions().map((q) => ({ questionId: q.id, answer: 'disagree' as const }))
+    const typeA = determineType(calculateScores(allAgree))
+    const typeB = determineType(calculateScores(allDisagree))
+    expect(typeA).not.toBe(typeB)
+
+    // 16 extreme answer patterns must reach 16 distinct types
+    const dims: [Dimension, Dimension][] = [
+      ['E', 'I'],
+      ['S', 'N'],
+      ['T', 'F'],
+      ['J', 'P'],
+    ]
+    const reached = new Set<string>()
+    for (const d1 of dims[0]) {
+      for (const d2 of dims[1]) {
+        for (const d3 of dims[2]) {
+          for (const d4 of dims[3]) {
+            const answers = createAnswersForType(d1, d2, d3, d4)
+            reached.add(determineType(calculateScores(answers)))
+          }
+        }
+      }
+    }
+    expect(reached.size).toBe(16)
+  })
 })
 
 describe('percentages and confidence', () => {
@@ -208,7 +254,7 @@ describe('answer validation', () => {
     expect(result.valid).toBe(false)
   })
 
-  it('should accept complete 60 answers', () => {
+  it('should accept complete 72 answers', () => {
     const answers = createAnswersForType('E', 'S', 'T', 'J')
     const result = validateAnswers(answers)
     expect(result.valid).toBe(true)
@@ -365,18 +411,18 @@ describe('boundary tests', () => {
       expect(result.error).toBeTruthy()
     })
 
-    it('should reject answers with 59 items', () => {
-      const answers = createAnswersForType('E', 'S', 'T', 'J').slice(0, 59)
+    it('should reject answers with 71 items', () => {
+      const answers = createAnswersForType('E', 'S', 'T', 'J').slice(0, 71)
       const result = validateAnswers(answers)
       expect(result.valid).toBe(false)
     })
 
     it('should accept answers with non-existent but valid ID count', () => {
-      const answers: Answer[] = Array.from({ length: 60 }, (_, i) => ({
+      const answers: Answer[] = Array.from({ length: 72 }, (_, i) => ({
         questionId: i + 1,
         answer: 'agree' as const,
       }))
-      // IDs 1-60 with same answer, all real question IDs
+      // IDs 1-72 with same answer, all real question IDs
       const result = validateAnswers(answers)
       expect(result.valid).toBe(true)
     })

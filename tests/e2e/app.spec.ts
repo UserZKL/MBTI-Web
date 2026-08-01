@@ -1,4 +1,4 @@
-﻿import { test, expect } from "@playwright/test"
+import { test, expect } from "@playwright/test"
 
 const DEVICE_SIZES = [
   { name: "small phone", width: 320, height: 568 },
@@ -22,15 +22,15 @@ const CRITICAL_PAGES = [
 
 async function completeTest(page: import("@playwright/test").Page, answer: "符合" | "不符合" = "符合") {
   for (let pageNum = 0; pageNum < 6; pageNum++) {
-    for (let i = 0; i < 10; i++) {
-      const qId = pageNum * 10 + i + 1
+    for (let i = 0; i < 12; i++) {
+      const qId = pageNum * 12 + i + 1
       const btn = page.getByRole("button", { name: `第 ${qId} 题 ${answer}` })
       await btn.waitFor({ state: "visible", timeout: 10000 })
       await btn.click({ force: true })
     }
     if (pageNum < 5) {
       await page.getByRole("button", { name: "下一页" }).click({ force: true })
-      await expect(page.getByRole("button", { name: `第 ${(pageNum + 1) * 10 + 1} 题 ${answer}` })).toBeVisible()
+      await expect(page.getByRole("button", { name: `第 ${(pageNum + 1) * 12 + 1} 题 ${answer}` })).toBeVisible()
     } else {
       await page.getByRole("button", { name: "查看结果" }).click({ force: true })
     }
@@ -113,14 +113,14 @@ test.describe("Flow 6: Incomplete Test Guard", () => {
     await expect(page).toHaveURL(/\/test/)
     await expect(page.getByRole("alert").first()).toBeVisible()
     await expect(page.getByText(/未作答/)).toBeVisible()
-    await expect(page.getByRole("button", { name: "第 11 题 符合" })).toBeHidden()
+    await expect(page.getByRole("button", { name: "第 13 题 符合" })).toBeHidden()
 
-    // 补答本页剩余 9 题后翻页成功
-    for (let i = 2; i <= 10; i++) {
+    // 补答本页剩余 11 题后翻页成功
+    for (let i = 2; i <= 12; i++) {
       await page.getByRole("button", { name: `第 ${i} 题 不符合` }).click({ force: true })
     }
     await page.getByRole("button", { name: "下一页" }).click({ force: true })
-    await expect(page.getByRole("button", { name: "第 11 题 符合" })).toBeVisible({ timeout: 10000 })
+    await expect(page.getByRole("button", { name: "第 13 题 符合" })).toBeVisible({ timeout: 10000 })
   })
 })
 
@@ -194,7 +194,7 @@ test.describe("Flow 9: V2 Homepage & Navigation", () => {
 
   test("should show last result entry from localStorage on homepage", async ({ page }) => {
     const data = Buffer.from(
-      JSON.stringify(Array.from({ length: 60 }, (_, i) => ({ questionId: i + 1, answer: "agree" })))
+      JSON.stringify(Array.from({ length: 72 }, (_, i) => ({ questionId: i + 1, answer: "agree" })))
     ).toString("base64")
     await page.addInitScript(
       (d) => {
@@ -214,7 +214,7 @@ test.describe("Flow 9: V2 Homepage & Navigation", () => {
 
   test("should show local history on profile when not logged in", async ({ page }) => {
     const data = Buffer.from(
-      JSON.stringify(Array.from({ length: 60 }, (_, i) => ({ questionId: i + 1, answer: "disagree" })))
+      JSON.stringify(Array.from({ length: 72 }, (_, i) => ({ questionId: i + 1, answer: "disagree" })))
     ).toString("base64")
     await page.addInitScript(
       (d) => {
@@ -234,7 +234,7 @@ test.describe("Flow 9: V2 Homepage & Navigation", () => {
 
   test("should show PersonAvatar on result page", async ({ page }) => {
     const data = Buffer.from(
-      JSON.stringify(Array.from({ length: 60 }, (_, i) => ({ questionId: i + 1, answer: "agree" })))
+      JSON.stringify(Array.from({ length: 72 }, (_, i) => ({ questionId: i + 1, answer: "agree" })))
     ).toString("base64")
     await page.goto(`/result?data=${data}`)
     await expect(page.getByRole("img", { name: /人格形象/ })).toBeVisible()
