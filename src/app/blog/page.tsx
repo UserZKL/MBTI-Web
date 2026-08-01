@@ -1,9 +1,10 @@
 import Link from "next/link"
 import { GradientText } from "@/components/shared/gradient-text"
 import { GlassCard } from "@/components/shared/glass-card"
+import { PageNav } from "@/components/shared/page-nav"
 import { getAllPosts } from "@/content/blog"
 import { type Metadata } from "next"
-import { Clock, Tag } from "lucide-react"
+import { Clock } from "lucide-react"
 
 export const metadata: Metadata = {
   title: "MBTI 博客 — 性格、成长与关系",
@@ -29,6 +30,7 @@ export default function BlogPage() {
       </div>
 
       <div className="container-page py-16 sm:py-20">
+        <PageNav className="mb-8" />
         <div className="mb-12">
           <GradientText as="h1" className="mb-3 text-3xl font-bold">
             MBTI 博客
@@ -42,7 +44,7 @@ export default function BlogPage() {
           {posts.map((post) => (
             <Link key={post.slug} href={`/blog/${post.slug}`}>
               <GlassCard variant="subtle" hover className="group p-6">
-                <div className="flex flex-wrap items-center gap-2 mb-2">
+                <div className="mb-2 flex flex-wrap items-center gap-2">
                   <span className="rounded-full border border-white/8 bg-white/[0.03] px-2 py-0.5 text-xs text-[var(--color-brand-cyan)]">
                     {CATEGORY_LABELS[post.category] ?? post.category}
                   </span>
@@ -55,19 +57,9 @@ export default function BlogPage() {
                 <h2 className="mb-1.5 text-base font-semibold text-[var(--color-text-primary)] transition-colors group-hover:text-white">
                   {post.title}
                 </h2>
-                <p className="mb-3 text-sm leading-relaxed text-[var(--color-text-secondary)]">
+                <p className="text-sm leading-relaxed text-[var(--color-text-secondary)]">
                   {post.description}
                 </p>
-
-                <div className="flex items-center gap-2">
-                  <span className="text-xs text-[var(--color-text-tertiary)]">{post.date}</span>
-                  {post.tags.slice(0, 3).map((tag) => (
-                    <span key={tag} className="flex items-center gap-0.5 text-xs text-[var(--color-text-tertiary)]">
-                      <Tag className="size-2.5" />
-                      {tag}
-                    </span>
-                  ))}
-                </div>
               </GlassCard>
             </Link>
           ))}

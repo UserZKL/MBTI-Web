@@ -5,6 +5,13 @@ import { usePathname, useRouter } from "next/navigation"
 import Link from "next/link"
 import { Home, ArrowLeft } from "lucide-react"
 
+const EXCLUDED_PATHS = ["/blog", "/compare", "/stats"]
+
+function isExcluded(pathname: string) {
+  if (pathname === "/blog" || pathname === "/compare" || pathname === "/stats") return true
+  return pathname.startsWith("/blog/")
+}
+
 export function HomeButton() {
   const pathname = usePathname()
   const router = useRouter()
@@ -17,7 +24,7 @@ export function HomeButton() {
     return () => clearTimeout(timer)
   }, [])
 
-  if (pathname === "/") return null
+  if (pathname === "/" || isExcluded(pathname) || EXCLUDED_PATHS.includes(pathname)) return null
 
   return (
     <div className="fixed bottom-6 left-6 z-50 flex items-center gap-2">

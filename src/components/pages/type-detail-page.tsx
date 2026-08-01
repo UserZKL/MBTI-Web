@@ -167,7 +167,7 @@ export function TypeDetailPage({ code }: TypeDetailPageProps) {
 
         {/* CTA */}
         <section className="text-center">
-          <GradientLink href="/test" glow>
+          <GradientLink href="/test" glow className="px-10 py-5 text-lg">
             开始你的测试
           </GradientLink>
         </section>

@@ -1,30 +1,46 @@
 "use client"
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
+import { useRef, useState } from "react"
 import Link from "next/link"
-import { ProgressBar } from "@/components/shared/progress-bar"
-import { GlassCard } from "@/components/shared/glass-card"
-import { Button } from "@/components/ui/button"
-import { LastResultButton } from "@/components/shared/last-result-button"
-import { getQuestions, type Answer, type Question } from "@/lib/mbti-utils"
+import { useRouter } from "next/navigation"
 import { ChevronLeft, ChevronRight, Home } from "lucide-react"
+import { GlassCard } from "@/components/shared/glass-card"
+import { ProgressBar } from "@/components/shared/progress-bar"
+import { LastResultButton } from "@/components/shared/last-result-button"
+import { getQuestions, type Answer } from "@/lib/mbti-utils"
 
 const STORAGE_KEY = "mbti-test-state"
+const PAGE_SIZE = 10
+const PAGE_COUNT = 6
 
-function saveState(currentIndex: number, answers: Answer[]) {
+interface SavedState {
+  currentPage: number
+  answers: Answer[]
+}
+
+function saveState(currentPage: number, answers: Answer[]) {
   try {
-    sessionStorage.setItem(STORAGE_KEY, JSON.stringify({ currentIndex, answers }))
+    sessionStorage.setItem(STORAGE_KEY, JSON.stringify({ currentPage, answers }))
   } catch {
     // sessionStorage unavailable
   }
 }
 
-function loadState(): { currentIndex: number; answers: Answer[] } | null {
+function loadState(): SavedState | null {
   try {
     const raw = sessionStorage.getItem(STORAGE_KEY)
     if (!raw) return null
-    return JSON.parse(raw)
+    const parsed = JSON.parse(raw)
+    if (parsed.currentPage !== undefined) {
+      return { currentPage: parsed.currentPage, answers: parsed.answers }
+    }
+    if (parsed.currentIndex !== undefined) {
+      return {
+        currentPage: Math.min(Math.floor(parsed.currentIndex / PAGE_SIZE), PAGE_COUNT - 1),
+        answers: parsed.answers,
+      }
+    }
+    return null
   } catch {
     return null
   }
@@ -41,22 +57,25 @@ function clearState() {
 export function TestPage() {
   const router = useRouter()
   const questions = getQuestions()
-  const [currentIndex, setCurrentIndex] = useState(0)
+  const [currentPage, setCurrentPage] = useState(0)
   const [answers, setAnswers] = useState<Answer[]>([])
-  const [isTransitioning, setIsTransitioning] = useState(false)
-  const [incompleteNotice, setIncompleteNotice] = useState(false)
   const [showResume, setShowResume] = useState(() => {
     const existing = loadState()
     return !!(existing && existing.answers.length > 0 && existing.answers.length < questions.length)
   })
-  const [savedState] = useState<{ currentIndex: number; answers: Answer[] } | null>(() => {
+  const [savedState] = useState<SavedState | null>(() => {
     const existing = loadState()
-    return (existing && existing.answers.length > 0 && existing.answers.length < questions.length) ? existing : null
+    return existing && existing.answers.length > 0 && existing.answers.length < questions.length
+      ? existing
+      : null
   })
+  const [incompleteNotice, setIncompleteNotice] = useState(false)
+  const [redIds, setRedIds] = useState<Set<number>>(new Set())
+  const questionRefs = useRef<Record<number, HTMLDivElement | null>>({})
 
   function handleResume() {
     if (savedState) {
-      setCurrentIndex(savedState.currentIndex)
+      setCurrentPage(savedState.currentPage)
       setAnswers(savedState.answers)
     }
     setShowResume(false)
@@ -67,72 +86,64 @@ export function TestPage() {
     setShowResume(false)
   }
 
-  const currentQuestion: Question = questions[currentIndex]
-
+  const pageStart = currentPage * PAGE_SIZE
+  const pageQuestions = questions.slice(pageStart, pageStart + PAGE_SIZE)
   const answeredIds = new Set(answers.map((a) => a.questionId))
+  const answeredCount = answeredIds.size
 
-  function handleAnswer(answer: "agree" | "disagree") {
-    setIsTransitioning(true)
+  function handleAnswer(questionId: number, answer: "agree" | "disagree") {
     setIncompleteNotice(false)
-
-    const existing = answers.find((a) => a.questionId === currentQuestion.id)
+    const existing = answers.find((a) => a.questionId === questionId)
     const newAnswers = existing
-      ? answers.map((a) =>
-          a.questionId === currentQuestion.id
-            ? { questionId: currentQuestion.id, answer }
-            : a
-        )
-      : [...answers, { questionId: currentQuestion.id, answer }]
+      ? answers.map((a) => (a.questionId === questionId ? { questionId, answer } : a))
+      : [...answers, { questionId, answer }]
     setAnswers(newAnswers)
-
-    setTimeout(() => {
-      if (currentIndex + 1 >= questions.length) {
-        const uniqueCount = new Set(newAnswers.map((a) => a.questionId)).size
-        if (uniqueCount < questions.length) {
-          const answeredSet = new Set(newAnswers.map((a) => a.questionId))
-          const firstUnanswered = questions.findIndex((q) => !answeredSet.has(q.id))
-          setIsTransitioning(false)
-          setCurrentIndex(firstUnanswered >= 0 ? firstUnanswered : currentIndex)
-          saveState(currentIndex, newAnswers)
-          setIncompleteNotice(true)
-          return
-        }
-        clearState()
-        const encoded = btoa(JSON.stringify(newAnswers))
-        router.push(`/result?data=${encoded}`)
-      } else {
-        const nextIndex = currentIndex + 1
-        setCurrentIndex(nextIndex)
-        saveState(nextIndex, newAnswers)
-        setIsTransitioning(false)
-      }
-    }, 300)
+    setRedIds((prev) => {
+      if (!prev.has(questionId)) return prev
+      const next = new Set(prev)
+      next.delete(questionId)
+      return next
+    })
+    saveState(currentPage, newAnswers)
   }
 
-  function handleGoBack() {
-    if (currentIndex > 0) {
-      setCurrentIndex((prev) => prev - 1)
-      setAnswers((prev) => prev.slice(0, -1))
+  function handleGoPrev() {
+    if (currentPage > 0) {
+      const nextPage = currentPage - 1
+      setCurrentPage(nextPage)
+      setIncompleteNotice(false)
+      setRedIds(new Set())
+      saveState(nextPage, answers)
+      window.scrollTo({ top: 0, behavior: "smooth" })
     }
   }
 
   function handleGoNext() {
-    if (currentIndex + 1 < questions.length) {
-      setCurrentIndex((prev) => prev + 1)
+    const unanswered = pageQuestions.filter((q) => !answeredIds.has(q.id))
+    if (unanswered.length > 0) {
+      setRedIds(new Set(unanswered.map((q) => q.id)))
+      setIncompleteNotice(true)
+      const firstId = unanswered[0]?.id
+      if (firstId !== undefined) {
+        questionRefs.current[firstId]?.scrollIntoView({ behavior: "smooth", block: "center" })
+      }
+      return
     }
-  }
 
-  function handleJump(index: number) {
-    const targetId = questions[index]?.id
-    setCurrentIndex(index)
-    let updated = answers
-    if (targetId) {
-      const filtered = answers.filter((a) => a.questionId !== targetId)
-      setAnswers(filtered)
-      updated = filtered
+    setIncompleteNotice(false)
+    setRedIds(new Set())
+
+    if (currentPage >= PAGE_COUNT - 1) {
+      clearState()
+      const encoded = btoa(JSON.stringify(answers))
+      router.push(`/result?data=${encoded}`)
+      return
     }
-    saveState(index, updated)
-    setIsTransitioning(false)
+
+    const nextPage = currentPage + 1
+    setCurrentPage(nextPage)
+    saveState(nextPage, answers)
+    window.scrollTo({ top: 0, behavior: "smooth" })
   }
 
   return (
@@ -171,10 +182,10 @@ export function TestPage() {
       )}
 
       {/* Header */}
-      <div className="w-full max-w-5xl pt-8">
+      <div className="w-full max-w-3xl pt-8">
         <div className="mb-2 flex items-center justify-between">
           <span className="text-sm tabular-nums text-[var(--color-text-tertiary)]">
-            {currentIndex + 1} / {questions.length}
+            第 {currentPage + 1} / {PAGE_COUNT} 页 · 已答 {answeredCount} / {questions.length}
           </span>
           <div className="flex items-center gap-3">
             <LastResultButton />
@@ -188,122 +199,100 @@ export function TestPage() {
           </div>
         </div>
 
-        <ProgressBar
-          value={currentIndex + 1}
-          max={questions.length}
-          showLabel={false}
-          variant="primary"
-        />
+        <ProgressBar value={answeredCount} max={questions.length} showLabel={false} variant="primary" />
       </div>
 
-      {/* Main layout: question left, grid right (desktop) */}
-      <div className="mt-6 w-full max-w-5xl flex-1 lg:grid lg:grid-cols-[1fr_320px] lg:items-start lg:gap-6">
-        <div className="flex flex-col items-center lg:items-stretch">
-          <div
-            className="w-full max-w-2xl transition-all duration-300 lg:max-w-none"
-            style={{
-              opacity: isTransitioning ? 0 : 1,
-              transform: isTransitioning ? "translateY(8px)" : "translateY(0)",
-            }}
+      {/* Questions */}
+      <div className="mt-6 w-full max-w-3xl flex-1">
+        <div className="space-y-4">
+          {pageQuestions.map((q, idx) => {
+            const isAnswered = answeredIds.has(q.id)
+            const isRed = redIds.has(q.id)
+            const globalIndex = pageStart + idx
+            return (
+              <div
+                key={q.id}
+                ref={(el) => {
+                  questionRefs.current[q.id] = el
+                }}
+              >
+                <GlassCard
+                  variant={isAnswered ? "subtle" : "prominent"}
+                  className={`p-6 sm:p-8 transition-all duration-200 ${
+                    isRed ? "border-2 border-[var(--color-error)]/60" : ""
+                  }`}
+                >
+                  {/* Question number badge */}
+                  <div className="mb-4 inline-flex items-center gap-1.5 rounded-full border border-white/8 bg-white/[0.02] px-3.5 py-1 text-sm text-[var(--color-text-tertiary)]">
+                    第 {globalIndex + 1} 题
+                  </div>
+
+                  {/* Question text */}
+                  <h2 className="mb-6 text-xl font-medium leading-relaxed text-[var(--color-text-primary)] sm:text-2xl">
+                    {q.text}
+                  </h2>
+
+                  {/* Answer buttons */}
+                  <div className="flex gap-4">
+                    <button
+                      onClick={() => handleAnswer(q.id, "agree")}
+                      aria-label={`第 ${q.id} 题 符合`}
+                      className={`flex-1 rounded-full border-0 py-5 text-lg font-medium text-white shadow-lg transition-all duration-200 hover:scale-[1.02] hover:shadow-[0_0_30px_rgba(124,58,237,0.3)] active:scale-[0.98] ${
+                        isAnswered ? "bg-[var(--color-success)]/80" : "gradient-primary"
+                      }`}
+                    >
+                      符合
+                    </button>
+                    <button
+                      onClick={() => handleAnswer(q.id, "disagree")}
+                      aria-label={`第 ${q.id} 题 不符合`}
+                      className={`flex-1 rounded-full border py-5 text-lg font-medium text-[var(--color-text-secondary)] transition-all duration-200 hover:scale-[1.02] hover:border-white/15 hover:bg-white/[0.04] active:scale-[0.98] ${
+                        isAnswered
+                          ? "border-[var(--color-success)]/60 bg-[var(--color-success)]/15"
+                          : "border-white/8 bg-white/[0.02]"
+                      }`}
+                    >
+                      不符合
+                    </button>
+                  </div>
+                </GlassCard>
+              </div>
+            )
+          })}
+        </div>
+
+        {/* Prev / Next navigation buttons */}
+        <div className="mt-6 flex w-full gap-4">
+          <button
+            onClick={handleGoPrev}
+            disabled={currentPage === 0}
+            className="flex flex-1 items-center justify-center gap-1.5 rounded-full border border-white/8 bg-white/[0.02] py-4 text-base font-medium text-[var(--color-text-secondary)] transition-all duration-200 hover:border-white/15 hover:bg-white/[0.04] disabled:opacity-30"
           >
-            <GlassCard variant="prominent" className="p-8 sm:p-14">
-              {/* Question number badge */}
-              <div className="mb-6 inline-flex items-center gap-1.5 rounded-full border border-white/8 bg-white/[0.02] px-4 py-1.5 text-sm text-[var(--color-text-tertiary)]">
-                第 {currentIndex + 1} 题
-              </div>
-
-              {/* Question text */}
-              <h2 className="mb-12 text-2xl font-medium leading-relaxed text-[var(--color-text-primary)] sm:text-3xl">
-                {currentQuestion.text}
-              </h2>
-
-              {/* Answer buttons */}
-              <div className="flex gap-4">
-                <Button
-                  onClick={() => handleAnswer("agree")}
-                  className="gradient-primary flex-1 border-0 py-8 text-lg font-medium text-white shadow-lg transition-all duration-200 hover:scale-[1.02] hover:shadow-[0_0_30px_rgba(124,58,237,0.3)] active:scale-[0.98]"
-                >
-                  符合
-                </Button>
-                <Button
-                  onClick={() => handleAnswer("disagree")}
-                  variant="outline"
-                  className="flex-1 border-white/8 bg-white/[0.02] py-8 text-lg font-medium text-[var(--color-text-secondary)] transition-all duration-200 hover:scale-[1.02] hover:border-white/15 hover:bg-white/[0.04] active:scale-[0.98]"
-                >
-                  不符合
-                </Button>
-              </div>
-            </GlassCard>
-          </div>
-
-          {/* Prev / Next navigation buttons */}
-          <div className="mt-6 flex w-full max-w-2xl gap-4 lg:max-w-none">
-            <Button
-              onClick={handleGoBack}
-              disabled={currentIndex === 0}
-              variant="outline"
-              className="flex-1 border-white/8 bg-white/[0.02] py-4 text-base font-medium text-[var(--color-text-secondary)] transition-all duration-200 hover:border-white/15 hover:bg-white/[0.04] disabled:opacity-30"
-            >
-              <ChevronLeft className="size-5" aria-hidden="true" />
-              上一题
-            </Button>
-            <Button
-              onClick={handleGoNext}
-              disabled={currentIndex + 1 >= questions.length}
-              variant="outline"
-              className="flex-1 border-white/8 bg-white/[0.02] py-4 text-base font-medium text-[var(--color-text-secondary)] transition-all duration-200 hover:border-white/15 hover:bg-white/[0.04] disabled:opacity-30"
-            >
-              下一题
-              <ChevronRight className="size-5" aria-hidden="true" />
-            </Button>
-          </div>
-
-          {/* Tips */}
-          <p className="mt-6 max-w-2xl text-center text-sm text-[var(--color-text-tertiary)] lg:max-w-none">
-            凭第一反应作答，没有对错之分
-          </p>
-
-          {incompleteNotice && (
-            <div className="mt-3 w-full max-w-2xl rounded-lg border border-[var(--color-brand-amber)]/30 bg-[var(--color-brand-amber)]/10 px-4 py-3 text-center text-sm text-[var(--color-brand-amber)] lg:max-w-none">
-              还有 {questions.length - new Set(answers.map((a) => a.questionId)).size} 题未作答，已跳转到最近的未答题，请完成全部题目
-            </div>
-          )}
+            <ChevronLeft className="size-5" aria-hidden="true" />
+            上一页
+          </button>
+          <button
+            onClick={handleGoNext}
+            className="gradient-primary flex flex-1 items-center justify-center gap-1.5 rounded-full border-0 py-4 text-base font-medium text-white shadow-lg transition-all duration-200 hover:scale-[1.02] hover:shadow-[0_0_30px_rgba(124,58,237,0.3)] active:scale-[0.98]"
+          >
+            {currentPage >= PAGE_COUNT - 1 ? "查看结果" : "下一页"}
+            <ChevronRight className="size-5" aria-hidden="true" />
+          </button>
         </div>
 
-        {/* 60-question grid navigator */}
-        <div className="lg:sticky lg:top-8">
-          <GlassCard variant="subtle" className="mt-6 w-full p-5 lg:mt-0">
-            <div className="mb-3 flex items-center justify-between">
-              <span className="text-sm text-[var(--color-text-secondary)]">答题进度</span>
-              <span className="text-sm tabular-nums text-[var(--color-brand-cyan)]">
-                已答 {answers.length} / {questions.length}
-              </span>
-            </div>
-            <div className="grid grid-cols-5 gap-1.5 sm:grid-cols-10 lg:grid-cols-4">
-              {questions.map((q, i) => {
-                const isAnswered = answeredIds.has(q.id)
-                const isCurrent = i === currentIndex
-                return (
-                  <button
-                    key={q.id}
-                    onClick={() => handleJump(i)}
-                    aria-label={`第 ${i + 1} 题${isAnswered ? "（已作答）" : ""}`}
-                    aria-current={isCurrent ? "true" : undefined}
-                    className={`flex h-9 items-center justify-center rounded-md text-sm font-medium tabular-nums transition-all duration-200 ${
-                      isCurrent
-                        ? "border-2 border-[var(--color-brand-gold)] bg-white/[0.06] text-[var(--color-brand-gold)]"
-                        : isAnswered
-                          ? "gradient-primary text-white shadow-md"
-                          : "border border-white/8 bg-white/[0.02] text-[var(--color-text-tertiary)] hover:border-white/20 hover:text-white"
-                    }`}
-                  >
-                    {i + 1}
-                  </button>
-                )
-              })}
-            </div>
-          </GlassCard>
-        </div>
+        {/* Tips */}
+        <p className="mt-6 text-center text-sm text-[var(--color-text-tertiary)]">
+          凭第一反应作答，没有对错之分
+        </p>
+
+        {incompleteNotice && (
+          <div
+            role="alert"
+            className="mt-3 w-full rounded-lg border border-[var(--color-brand-amber)]/30 bg-[var(--color-brand-amber)]/10 px-4 py-3 text-center text-sm text-[var(--color-brand-amber)]"
+          >
+            本页还有 {pageQuestions.length - pageQuestions.filter((q) => answeredIds.has(q.id)).length} 题未作答，请完成本页全部题目（未答题已标红）
+          </div>
+        )}
       </div>
     </div>
   )

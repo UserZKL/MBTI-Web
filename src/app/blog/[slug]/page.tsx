@@ -4,8 +4,9 @@ import { type Metadata } from "next"
 import { GradientText } from "@/components/shared/gradient-text"
 import { GlassCard } from "@/components/shared/glass-card"
 import { GradientLink } from "@/components/shared/gradient-button"
+import { PageNav } from "@/components/shared/page-nav"
 import { getPostBySlug, getRelatedPosts, getAllPosts } from "@/content/blog"
-import { ArrowLeft, Clock, Tag, Calendar } from "lucide-react"
+import { Clock } from "lucide-react"
 
 interface Props {
   params: Promise<{ slug: string }>
@@ -43,13 +44,7 @@ export default async function BlogDetailPage({ params }: Props) {
       </div>
 
       <main className="container-page py-12 sm:py-16">
-        <Link
-          href="/blog"
-          className="mb-6 inline-flex items-center gap-1.5 text-xs text-[var(--color-text-tertiary)] transition-colors hover:text-white"
-        >
-          <ArrowLeft className="size-3" />
-          返回博客列表
-        </Link>
+        <PageNav className="mb-6" />
 
         <article>
           <header className="mb-8">
@@ -70,10 +65,6 @@ export default async function BlogDetailPage({ params }: Props) {
                 <Clock className="size-3" />
                 {post.readTimeMinutes} 分钟
               </span>
-              <span className="flex items-center gap-1 text-xs text-[var(--color-text-tertiary)]">
-                <Calendar className="size-3" />
-                {post.date}
-              </span>
             </div>
 
             <GradientText as="h1" className="mb-3 text-3xl font-bold">
@@ -83,18 +74,6 @@ export default async function BlogDetailPage({ params }: Props) {
             <p className="text-base leading-relaxed text-[var(--color-text-secondary)]">
               {post.description}
             </p>
-
-            <div className="mt-4 flex flex-wrap gap-1.5">
-              {post.tags.map((tag) => (
-                <span
-                  key={tag}
-                  className="flex items-center gap-0.5 rounded-full border border-white/6 bg-white/[0.02] px-2 py-0.5 text-xs text-[var(--color-text-tertiary)]"
-                >
-                  <Tag className="size-2.5" />
-                  {tag}
-                </span>
-              ))}
-            </div>
           </header>
 
           <div className="prose prose-invert prose-sm max-w-none text-[var(--color-text-secondary)] leading-relaxed

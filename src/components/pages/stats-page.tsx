@@ -6,7 +6,8 @@ import { GradientText } from "@/components/shared/gradient-text"
 import { GradientLink } from "@/components/shared/gradient-button"
 import { GlassCard } from "@/components/shared/glass-card"
 import { TypeBadge } from "@/components/shared/type-badge"
-import { ArrowLeft, BarChart3, Users, PieChart, Loader2 } from "lucide-react"
+import { PageNav } from "@/components/shared/page-nav"
+import { BarChart3, Users, PieChart, Loader2 } from "lucide-react"
 
 interface StatsData {
   totalCount: number
@@ -49,13 +50,7 @@ export function StatsPage() {
       </div>
 
       <div className="container-page pb-20">
-        <Link
-          href="/"
-          className="mb-8 mt-6 inline-flex items-center gap-1.5 text-xs text-[var(--color-text-tertiary)] transition-colors hover:text-white"
-        >
-          <ArrowLeft className="size-3" />
-          返回首页
-        </Link>
+        <PageNav className="mb-8 mt-6" />
 
         <div className="mb-10 text-center">
           <GradientText as="h1" className="mb-3 text-3xl font-bold sm:text-4xl">
@@ -191,7 +186,7 @@ export function StatsPage() {
             </section>
 
             <section className="pt-4 text-center">
-              <GradientLink href="/test" glow>
+              <GradientLink href="/test" glow className="px-10 py-5 text-lg">
                 开始你的测试
               </GradientLink>
             </section>

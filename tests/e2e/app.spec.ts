@@ -20,6 +20,23 @@ const CRITICAL_PAGES = [
   { path: "/profile", name: "Profile" },
 ]
 
+async function completeTest(page: import("@playwright/test").Page, answer: "符合" | "不符合" = "符合") {
+  for (let pageNum = 0; pageNum < 6; pageNum++) {
+    for (let i = 0; i < 10; i++) {
+      const qId = pageNum * 10 + i + 1
+      const btn = page.getByRole("button", { name: `第 ${qId} 题 ${answer}` })
+      await btn.waitFor({ state: "visible", timeout: 10000 })
+      await btn.click({ force: true })
+    }
+    if (pageNum < 5) {
+      await page.getByRole("button", { name: "下一页" }).click({ force: true })
+      await expect(page.getByRole("button", { name: `第 ${(pageNum + 1) * 10 + 1} 题 ${answer}` })).toBeVisible()
+    } else {
+      await page.getByRole("button", { name: "查看结果" }).click({ force: true })
+    }
+  }
+}
+
 test.describe("Flow 1: Complete Test Journey", () => {
   test("should complete full test flow and see result", async ({ page }) => {
     await page.goto("/")
@@ -28,19 +45,9 @@ test.describe("Flow 1: Complete Test Journey", () => {
     const startBtn = page.getByRole("link", { name: /开始测试|免费/ })
     await startBtn.first().click()
     await page.waitForURL("/test")
-    await expect(page.locator("h2")).toBeVisible()
+    await expect(page.locator("h2").first()).toBeVisible()
 
-    const question = page.locator("h2").first()
-    let prevQuestion = ""
-    for (let i = 0; i < 60; i++) {
-      if (i > 0) {
-        await expect(question).not.toHaveText(prevQuestion, { timeout: 15000 })
-      }
-      prevQuestion = (await question.textContent()) ?? ""
-      const agreeBtn = page.getByRole("button", { name: "符合", exact: true })
-      await agreeBtn.waitFor({ state: "visible", timeout: 10000 })
-      await agreeBtn.click({ force: true })
-    }
+    await completeTest(page)
 
     await page.waitForURL("/result?data=*", { timeout: 30000 })
     await expect(page.locator("h1")).toBeVisible()
@@ -89,26 +96,31 @@ test.describe("Flow 4: Blog Browsing", () => {
     await page.waitForURL("/blog/**")
 
     await expect(page.locator("h1")).toBeVisible()
-    await expect(page.getByText("返回博客").first()).toBeVisible()
+    await expect(page.getByRole("link", { name: "首页" }).first()).toBeVisible()
   })
 })
 
 test.describe("Flow 6: Incomplete Test Guard", () => {
-  test("should block submission when questions are unanswered", async ({ page }) => {
+  test("should block page navigation when questions are unanswered", async ({ page }) => {
     await page.goto("/test")
 
-    const agreeBtn = page.getByRole("button", { name: "符合", exact: true })
-    await agreeBtn.waitFor({ state: "visible", timeout: 10000 })
-    await agreeBtn.click()
-    await page.waitForTimeout(350)
+    await expect(page.getByRole("button", { name: "第 1 题 符合" })).toBeVisible()
 
-    await page.getByRole("button", { name: "第 60 题" }).click()
-    await agreeBtn.waitFor({ state: "visible", timeout: 10000 })
-    await agreeBtn.click()
-    await page.waitForTimeout(400)
+    // 只答 1 题后点击下一页 → 被拦截并标红
+    await page.getByRole("button", { name: "第 1 题 符合" }).click({ force: true })
+    await page.getByRole("button", { name: "下一页" }).click({ force: true })
 
     await expect(page).toHaveURL(/\/test/)
+    await expect(page.getByRole("alert").first()).toBeVisible()
     await expect(page.getByText(/未作答/)).toBeVisible()
+    await expect(page.getByRole("button", { name: "第 11 题 符合" })).toBeHidden()
+
+    // 补答本页剩余 9 题后翻页成功
+    for (let i = 2; i <= 10; i++) {
+      await page.getByRole("button", { name: `第 ${i} 题 不符合` }).click({ force: true })
+    }
+    await page.getByRole("button", { name: "下一页" }).click({ force: true })
+    await expect(page.getByRole("button", { name: "第 11 题 符合" })).toBeVisible({ timeout: 10000 })
   })
 })
 
@@ -116,17 +128,7 @@ test.describe("Flow 7: Result Save & Share", () => {
   test("should auto-save result after full test", async ({ page }) => {
     await page.goto("/test")
 
-    const question = page.locator("h2").first()
-    let prevQuestion = ""
-    for (let i = 0; i < 60; i++) {
-      if (i > 0) {
-        await expect(question).not.toHaveText(prevQuestion, { timeout: 15000 })
-      }
-      prevQuestion = (await question.textContent()) ?? ""
-      const agreeBtn = page.getByRole("button", { name: "符合", exact: true })
-      await agreeBtn.waitFor({ state: "visible", timeout: 10000 })
-      await agreeBtn.click({ force: true })
-    }
+    await completeTest(page)
 
     await page.waitForURL("/result?data=*", { timeout: 30000 })
     await expect(page.getByText(/已保存/)).toBeVisible({ timeout: 10000 })

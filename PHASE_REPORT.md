@@ -201,3 +201,39 @@ ew PrismaLibSql({ url })（adapter 内部自建 client）→ 所有保存请求 
 
 ### 备注
 - E2E 在预热 dev server 上运行（Playwright 冷启动 dev server + 并发 worker 会导致 Next.js dev full reload，sessionStorage 残留触发恢复弹窗误报）
+---
+
+## V4 UX 优化报告（USER_FEEDBACK3.txt · 3 大块）
+
+### A. 结果页
+- **8 轴雷达图**：result-chart.tsx 重写（viewBox 320、正八边形网格、E/T/J/N/I/F/P/S 8 轴、轴端字母标签不再被裁剪，T/F、E/I 完整显示）；修复原 4 轴图 T/F、E/I 标签溢出问题
+- **16 型内容全字段扩写**（personality-types.json）：描述 ~200 字（原 89）、优势/成长空间 8 条（原 5）、职业 8 条（带一句话说明）、成长建议 6 条（原 4）、人际关系三段 ~80-100 字（原 30-40）
+- **字体放大**：优势/成长空间标题 text-lg、列表 text-base；职业 chips、成长建议、人际关系正文全部 text-base；AI 报告提示 text-base
+- **底部 4 按钮统一**：px-8 py-3.5 text-base、图标 size-5、间距 gap-5；「查看所有类型」→ 跳首页 /#types 锚点
+
+### B. 探索更多三页
+- blog 列表/详情：去除 date 与 tags（保留 category 胶囊 + 阅读时长）
+- 三页左上角统一「返回（上一页）+ 首页」导航（新组件 PageNav），左下角浮动 HomeButton 在 blog/compare/stats 隐藏防重复
+- compare 下拉背景加深（bg-white/[0.03] → bg-white/[0.08]）
+- compare/stats/type-detail 底部「开始你的测试」CTA 统一放大（px-10 py-5 text-lg）
+
+### C. 做题页重构（6 页 × 10 题）
+- 抛弃 60 题网格 + 逐题跳转 → 每页 10 题列表，题卡独立卡片
+- 每页 10 题全部作答才能「下一页」；未答完点击时：未答题标红（border-error）+ 琥珀提示条（role=alert）+ 滚动定位第一个未答题
+- 已答题卡片自动变为 subtle 弱化样式，答对的按钮显示 success 色
+- 「上一题/下一题」→「上一页/下一页」（最后一页按钮为「查看结果」）
+- 恢复弹窗兼容旧存档格式
+
+### 验证
+| Check | Result |
+|-------|--------|
+| typecheck | ✅ |
+| lint | ✅ 0 errors 0 warnings |
+| test | ✅ 82/82（5 files） |
+| build | ✅ 43 routes（严格 TS）+ Proxy(Middleware) |
+| E2E | ✅ 55/55（Flow 1/6/7 重写：完整答题/未答完拦截/保存+分享） |
+| Git | V4 commit |
+
+### 备注
+- E2E Flow 1/6 修复 strict mode 断言（每页 10 个 h2 → .first()；Next.js route announcer 的 role=alert 干扰 → .first()）
+- dev server 曾意外挂掉（PID 变化），重启后需预热路由避免首次编译超时

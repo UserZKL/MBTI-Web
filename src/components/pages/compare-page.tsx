@@ -1,13 +1,13 @@
 "use client"
 
 import { useState } from "react"
-import Link from "next/link"
 import { GradientText } from "@/components/shared/gradient-text"
 import { GradientLink } from "@/components/shared/gradient-button"
 import { GlassCard } from "@/components/shared/glass-card"
 import { TypeBadge } from "@/components/shared/type-badge"
+import { PageNav } from "@/components/shared/page-nav"
 import { getAllPersonalityTypes, type PersonalityTypeData } from "@/lib/mbti-utils"
-import { ArrowLeft, ArrowRightLeft, Check } from "lucide-react"
+import { ArrowRightLeft, Check } from "lucide-react"
 
 const allTypes = getAllPersonalityTypes()
 
@@ -53,13 +53,7 @@ export function ComparePage() {
       </div>
 
       <div className="container-page pb-20">
-        <Link
-          href="/types"
-          className="mb-8 mt-6 inline-flex items-center gap-1.5 text-xs text-[var(--color-text-tertiary)] transition-colors hover:text-white"
-        >
-          <ArrowLeft className="size-3" />
-          返回类型列表
-        </Link>
+        <PageNav className="mb-8 mt-6" />
 
         <div className="mb-10 text-center">
           <GradientText as="h1" className="mb-3 text-3xl font-bold sm:text-4xl">
@@ -80,7 +74,7 @@ export function ComparePage() {
               id="typeA"
               value={selectedA}
               onChange={(e) => { setSelectedA(e.target.value); setShowResult(false) }}
-              className="w-full rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2.5 text-sm text-[var(--color-text-primary)] focus:border-[var(--color-brand-purple)] focus:outline-none"
+              className="w-full rounded-lg border border-white/10 bg-white/[0.08] px-3 py-2.5 text-sm text-[var(--color-text-primary)] focus:border-[var(--color-brand-purple)] focus:outline-none"
             >
               <option value="" disabled>选择人格类型...</option>
               {allTypes.map((t) => (
@@ -101,7 +95,7 @@ export function ComparePage() {
               id="typeB"
               value={selectedB}
               onChange={(e) => { setSelectedB(e.target.value); setShowResult(false) }}
-              className="w-full rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2.5 text-sm text-[var(--color-text-primary)] focus:border-[var(--color-brand-cyan)] focus:outline-none"
+              className="w-full rounded-lg border border-white/10 bg-white/[0.08] px-3 py-2.5 text-sm text-[var(--color-text-primary)] focus:border-[var(--color-brand-cyan)] focus:outline-none"
             >
               <option value="" disabled>选择人格类型...</option>
               {allTypes.map((t) => (
@@ -227,7 +221,7 @@ export function ComparePage() {
 
             {/* CTA */}
             <section className="pt-6 text-center">
-              <GradientLink href="/test" glow>
+              <GradientLink href="/test" glow className="px-10 py-5 text-lg">
                 开始你的测试
               </GradientLink>
             </section>
