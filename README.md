@@ -46,15 +46,25 @@ Windows 用户注意：本项目的构建脚本使用 `--webpack` 标志（Turbo
 
 以下为传统的手动操作流程，适合希望逐步了解项目结构的情况。
 
-#### 第 1 步：下载代码
+### 第 1 步：选择存放文件夹并下载代码
 
-打开终端（macOS/Linux 用 Terminal，Windows 用 PowerShell 或 CMD），执行：
+先在你电脑上选一个想存放项目的文件夹（例如 Windows 的 `D:\projects` 或 macOS/Linux 的 `~/projects`），打开终端（macOS/Linux 用 Terminal，Windows 用 PowerShell 或 CMD）并进入该文件夹：
+
+```bash
+# Windows (PowerShell)
+cd D:\projects
+
+# macOS / Linux
+cd ~/projects
+```
+
+接着在终端执行：
 
 ```bash
 git clone https://github.com/UserZKL/MBTI-Web.git
 ```
 
-这会在当前目录创建一个 `MBTI-Web` 文件夹，里面就是全部源码。
+这会在当前文件夹里创建一个 `MBTI-Web` 子文件夹，里面就是全部源码（下一步的 `cd MBTI-Web` 即进入它）。
 
 ### 第 2 步：进入项目目录
 
@@ -125,8 +135,15 @@ npm run build       # 生产构建
 
 ```bash
 # 安装（如未安装）：npm install -g @anthropic-ai/claude-code
+
+# 1. 先在本地选一个想存放项目的文件夹（例如 D:\projects），进入它：
+cd D:\projects
+
+# 2. 下载项目并进入：
 git clone https://github.com/UserZKL/MBTI-Web.git
 cd MBTI-Web
+
+# 3. 启动 Claude Code：
 claude
 ```
 
@@ -138,8 +155,15 @@ claude
 
 ```bash
 # 安装（如未安装）：npm install -g @openai/codex
+
+# 1. 先在本地选一个想存放项目的文件夹（例如 D:\projects），进入它：
+cd D:\projects
+
+# 2. 下载项目并进入：
 git clone https://github.com/UserZKL/MBTI-Web.git
 cd MBTI-Web
+
+# 3. 启动 Codex CLI：
 codex
 ```
 
@@ -151,8 +175,15 @@ codex
 
 ```bash
 # 安装（如未安装）：npm install -g opencode-ai
+
+# 1. 先在本地选一个想存放项目的文件夹（例如 D:\projects），进入它：
+cd D:\projects
+
+# 2. 下载项目并进入：
 git clone https://github.com/UserZKL/MBTI-Web.git
 cd MBTI-Web
+
+# 3. 启动 OpenCode CLI：
 opencode
 ```
 
