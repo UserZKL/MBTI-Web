@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useState, useEffect } from "react"
 import Link from "next/link"
@@ -15,6 +15,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { History, Settings, LogOut, TrendingUp, TestTube, ChevronRight, Loader2 } from "lucide-react"
+import { readLocalHistory, type LocalHistoryItem } from "@/lib/local-history"
 
 interface UserInfo {
   id?: string
@@ -57,6 +58,7 @@ export function ProfileClient({ user }: ProfileClientProps) {
   const [detail, setDetail] = useState<ResultDetail | null>(null)
   const [detailLoading, setDetailLoading] = useState(false)
   const [detailError, setDetailError] = useState<string | null>(null)
+  const [localHistory, setLocalHistory] = useState<LocalHistoryItem[]>([])
 
   useEffect(() => {
     if (user) {
@@ -71,8 +73,21 @@ export function ProfileClient({ user }: ProfileClientProps) {
         })
         .catch(() => setError("加载测试记录失败，请稍后重试"))
         .finally(() => setLoading(false))
+    } else {
+      const timer = setTimeout(() => {
+        setLocalHistory(readLocalHistory())
+        setLoading(false)
+      }, 0)
+      return () => clearTimeout(timer)
     }
   }, [user])
+
+  const displayHistory = user ? history : localHistory
+  const displayTotal = user ? total : localHistory.length
+  const uniqueTypes = new Set(displayHistory.map((h) => h.typeCode)).size
+  const typeChanges = displayHistory.length > 1
+    ? displayHistory.filter((h, i, arr) => i > 0 && h.typeCode !== arr[i - 1]?.typeCode).length
+    : 0
 
   const handleOpenDetail = async (id: string) => {
     setSelectedId(id)
@@ -90,11 +105,6 @@ export function ProfileClient({ user }: ProfileClientProps) {
       setDetailLoading(false)
     }
   }
-
-  const uniqueTypes = new Set(history.map((h) => h.typeCode)).size
-  const typeChanges = history.length > 1
-    ? history.filter((h, i, arr) => i > 0 && h.typeCode !== arr[i - 1]?.typeCode).length
-    : 0
 
   return (
     <div className="relative min-h-screen overflow-x-clip">
@@ -171,61 +181,88 @@ export function ProfileClient({ user }: ProfileClientProps) {
         </GlassCard>
 
         {/* Test History */}
-        {user && (
-          <section className="mb-8">
-            <div className="mb-4 flex items-center gap-2">
-              <History className="size-4 text-[var(--color-brand-cyan)]" />
-              <h2 className="text-base font-semibold text-[var(--color-text-primary)]">测试记录</h2>
-            </div>
+        <section className="mb-8">
+          <div className="mb-4 flex items-center gap-2">
+            <History className="size-4 text-[var(--color-brand-cyan)]" />
+            <h2 className="text-base font-semibold text-[var(--color-text-primary)]">
+              {user ? "测试记录" : "本地测试记录"}
+            </h2>
+          </div>
 
-            {loading ? (
-              <div className="flex justify-center py-8">
-                <Loader2 className="size-5 animate-spin text-[var(--color-text-secondary)]" />
-              </div>
-            ) : error ? (
-              <p className="py-8 text-center text-sm text-red-400">{error}</p>
-            ) : history.length === 0 ? (
-              <p className="py-8 text-center text-sm text-[var(--color-text-tertiary)]">
-                暂无测试记录
-              </p>
-            ) : (
-              <ul className="space-y-2">
-                {history.map((entry) => (
-                  <li key={entry.id}>
-                    <button
-                      type="button"
-                      onClick={() => handleOpenDetail(entry.id)}
-                      className="w-full text-left"
-                      aria-label={`查看 ${TYPE_NAMES[entry.typeCode] ?? entry.typeCode} 测试详情`}
-                    >
-                      <GlassCard variant="subtle" hover className="flex items-center justify-between p-4">
-                        <div className="flex items-center gap-3">
-                          <TypeBadge type={entry.typeCode} size="sm" />
-                          <div>
-                            <p className="text-sm text-[var(--color-text-primary)]">
-                              {TYPE_NAMES[entry.typeCode] ?? entry.typeCode}
-                            </p>
-                            <p className="text-xs text-[var(--color-text-tertiary)]">
-                              {new Date(entry.createdAt).toLocaleDateString("zh-CN")}
-                            </p>
-                          </div>
+          {loading ? (
+            <div className="flex justify-center py-8">
+              <Loader2 className="size-5 animate-spin text-[var(--color-text-secondary)]" />
+            </div>
+          ) : error ? (
+            <p className="py-8 text-center text-sm text-red-400">{error}</p>
+          ) : displayHistory.length === 0 ? (
+            <p className="py-8 text-center text-sm text-[var(--color-text-tertiary)]">
+              {user ? "暂无测试记录" : "还没有测试记录，完成一次测试后会自动保存到这里"}
+            </p>
+          ) : user ? (
+            <ul className="space-y-2">
+              {history.map((entry) => (
+                <li key={entry.id}>
+                  <button
+                    type="button"
+                    onClick={() => handleOpenDetail(entry.id)}
+                    className="w-full text-left"
+                    aria-label={`查看 ${TYPE_NAMES[entry.typeCode] ?? entry.typeCode} 测试详情`}
+                  >
+                    <GlassCard variant="subtle" hover className="flex items-center justify-between p-4">
+                      <div className="flex items-center gap-3">
+                        <TypeBadge type={entry.typeCode} size="sm" />
+                        <div>
+                          <p className="text-sm text-[var(--color-text-primary)]">
+                            {TYPE_NAMES[entry.typeCode] ?? entry.typeCode}
+                          </p>
+                          <p className="text-xs text-[var(--color-text-tertiary)]">
+                            {new Date(entry.createdAt).toLocaleDateString("zh-CN")}
+                          </p>
                         </div>
-                        <ChevronRight className="size-4 text-[var(--color-text-tertiary)]" />
-                      </GlassCard>
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </section>
-        )}
+                      </div>
+                      <ChevronRight className="size-4 text-[var(--color-text-tertiary)]" />
+                    </GlassCard>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <ul className="space-y-2">
+              {localHistory.map((entry) => (
+                <li key={entry.data}>
+                  <Link
+                    href={`/result?data=${encodeURIComponent(entry.data)}`}
+                    className="block w-full"
+                    aria-label={`查看 ${TYPE_NAMES[entry.typeCode] ?? entry.typeCode} 测试结果`}
+                  >
+                    <GlassCard variant="subtle" hover className="flex items-center justify-between p-4">
+                      <div className="flex items-center gap-3">
+                        <TypeBadge type={entry.typeCode} size="sm" />
+                        <div>
+                          <p className="text-sm text-[var(--color-text-primary)]">
+                            {TYPE_NAMES[entry.typeCode] ?? entry.typeCode}
+                          </p>
+                          <p className="text-xs text-[var(--color-text-tertiary)]">
+                            {new Date(entry.createdAt).toLocaleDateString("zh-CN")}
+                          </p>
+                        </div>
+                      </div>
+                      <ChevronRight className="size-4 text-[var(--color-text-tertiary)]" />
+                    </GlassCard>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
 
         {/* Stats */}
         <section className="mb-8 grid gap-4 sm:grid-cols-3">
           <GlassCard variant="subtle" className="flex flex-col items-center p-5 text-center">
             <TestTube className="mb-2 size-5 text-[var(--color-brand-purple)]" />
             <p className="text-lg font-bold text-[var(--color-text-primary)] tabular-nums">
-              {total}
+              {displayTotal}
             </p>
             <p className="text-xs text-[var(--color-text-tertiary)]">已完成测试</p>
           </GlassCard>

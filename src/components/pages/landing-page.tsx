@@ -3,8 +3,9 @@ import { GradientText } from "@/components/shared/gradient-text"
 import { GradientLink } from "@/components/shared/gradient-button"
 import { GlassCard } from "@/components/shared/glass-card"
 import { TypeBadge } from "@/components/shared/type-badge"
+import { LastResultButton } from "@/components/shared/last-result-button"
 import { getAllPersonalityTypes } from "@/lib/mbti-utils"
-import { Hash, TrendingUp, Brain, Lightbulb } from "lucide-react"
+import { Hash, TrendingUp, Brain, Lightbulb, BookOpen, Scale, BarChart3 } from "lucide-react"
 
 const DIMENSIONS = [
   {
@@ -41,6 +42,30 @@ const DIMENSIONS = [
   },
 ]
 
+const EXPLORE_LINKS = [
+  {
+    href: "/blog",
+    title: "MBTI 博客",
+    desc: "深入浅出的人格知识，帮你更懂自己和他人",
+    icon: BookOpen,
+    accent: "text-[var(--color-brand-purple)]",
+  },
+  {
+    href: "/compare",
+    title: "对比类型",
+    desc: "两两对比不同人格，发现差异与默契",
+    icon: Scale,
+    accent: "text-[var(--color-brand-cyan)]",
+  },
+  {
+    href: "/stats",
+    title: "统计数据",
+    desc: "看看全球用户都在什么人格里",
+    icon: BarChart3,
+    accent: "text-[var(--color-brand-amber)]",
+  },
+]
+
 export function LandingPage() {
   const types = getAllPersonalityTypes()
 
@@ -54,25 +79,28 @@ export function LandingPage() {
 
       {/* Hero Section */}
       <section className="relative flex flex-col items-center px-4 pb-16 pt-24 text-center sm:pt-32">
-        <div className="mb-6 inline-flex items-center gap-1.5 rounded-full border border-white/8 bg-white/[0.02] px-4 py-1.5 text-xs text-[var(--color-text-secondary)]">
+        <div className="animate-fade-up mb-6 inline-flex items-center gap-1.5 rounded-full border border-white/8 bg-white/[0.02] px-5 py-2 text-sm text-[var(--color-text-secondary)]">
           <span className="inline-block size-1.5 rounded-full bg-[var(--color-brand-cyan)]" />
           免费 · 60 题 · 约 10 分钟
         </div>
 
-        <GradientText as="h1" className="mb-6 max-w-3xl text-4xl font-bold !leading-tight sm:text-5xl lg:text-6xl">
+        <GradientText as="h1" className="animate-fade-up animation-delay-100 mb-6 max-w-3xl text-5xl font-bold !leading-tight sm:text-6xl lg:text-7xl">
           发现你的真实人格
         </GradientText>
 
-        <p className="mb-10 max-w-xl text-base text-[var(--color-text-secondary)] sm:text-lg">
+        <p className="animate-fade-up animation-delay-200 mb-10 max-w-xl text-lg text-[var(--color-text-secondary)] sm:text-xl">
           基于荣格心理学理论的专业 MBTI 测试。
           深入了解你的性格特质、优势劣势，找到属于你的方向和可能性。
         </p>
 
-        <GradientLink href="/test" glow className="px-8 py-4 text-base">
-          开始测试 — 免费
-        </GradientLink>
+        <div className="animate-fade-up animation-delay-300 flex flex-col items-center gap-4">
+          <GradientLink href="/test" glow className="px-10 py-5 text-lg">
+            开始测试
+          </GradientLink>
+          <LastResultButton />
+        </div>
 
-        <p className="mt-4 text-xs text-[var(--color-text-tertiary)]">
+        <p className="animate-fade-up animation-delay-400 mt-4 text-sm text-[var(--color-text-tertiary)]">
           无需注册，即刻开始
         </p>
       </section>
@@ -136,19 +164,38 @@ export function LandingPage() {
         </div>
       </section>
 
-      {/* Bottom CTA */}
-      <section className="mx-auto max-w-2xl px-4 pb-32 text-center">
-        <GlassCard variant="prominent" glow="purple" className="p-10 sm:p-16">
-          <GradientText as="h2" className="mb-4 text-2xl font-bold sm:text-3xl">
-            准备好了吗？
+      {/* Explore Section */}
+      <section className="mx-auto max-w-4xl px-4 pb-32">
+        <div className="mb-12 text-center">
+          <GradientText as="h2" className="mb-3 text-2xl font-bold sm:text-3xl">
+            探索更多
           </GradientText>
-          <p className="mb-8 text-sm text-[var(--color-text-secondary)]">
-            60 道生活化的情境题，帮你发现更真实的自己
+          <p className="text-sm text-[var(--color-text-secondary)]">
+            继续你的 MBTI 之旅
           </p>
-          <GradientLink href="/test" glow className="px-8 py-4 text-base">
-            开始测试
-          </GradientLink>
-        </GlassCard>
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-3">
+          {EXPLORE_LINKS.map((item) => (
+            <Link key={item.href} href={item.href} className="group">
+              <GlassCard
+                variant="subtle"
+                hover
+                className="flex h-full flex-col items-center gap-3 p-8 text-center"
+              >
+                <div className="flex size-14 items-center justify-center rounded-2xl bg-white/[0.04] transition-transform duration-300 group-hover:scale-110">
+                  <item.icon className={`size-6 ${item.accent}`} />
+                </div>
+                <h3 className="text-lg font-semibold text-[var(--color-text-primary)] transition-colors group-hover:text-white">
+                  {item.title}
+                </h3>
+                <p className="text-sm leading-relaxed text-[var(--color-text-tertiary)]">
+                  {item.desc}
+                </p>
+              </GlassCard>
+            </Link>
+          ))}
+        </div>
       </section>
 
       {/* Footer */}

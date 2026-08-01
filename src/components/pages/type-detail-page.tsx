@@ -3,6 +3,7 @@ import { GradientText } from "@/components/shared/gradient-text"
 import { GradientButton, GradientLink } from "@/components/shared/gradient-button"
 import { GlassCard } from "@/components/shared/glass-card"
 import { TypeBadge } from "@/components/shared/type-badge"
+import { PersonAvatar } from "@/components/shared/person-avatar"
 import { getPersonalityTypeData, getAllPersonalityTypes } from "@/lib/mbti-utils"
 import { TrendingUp, Briefcase, Heart, Users, ArrowLeft, AlertTriangle } from "lucide-react"
 
@@ -44,6 +45,7 @@ export function TypeDetailPage({ code }: TypeDetailPageProps) {
 
         {/* Header */}
         <section className="mb-10 text-center">
+          <PersonAvatar type={t.code} size={140} className="mx-auto mb-5" />
           <TypeBadge type={t.code} size="lg" className="mb-4" />
           <GradientText as="h1" className="mb-2 text-3xl font-bold sm:text-4xl">
             {t.name}

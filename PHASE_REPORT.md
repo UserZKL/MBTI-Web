@@ -127,3 +127,44 @@ ew PrismaLibSql({ url })（adapter 内部自建 client）→ 所有保存请求 
 - 此前报告中「邮箱验证码登录可用」的结论不准确：实际因 adapter 缺失方法而 500，本批次已修复（/api/auth/session 200 + providers 正常）
 - npm audit 12 项高危仍为构建期传递依赖，无法无破坏修复，按既定策略跟踪不阻塞
 - 部署时需在 Vercel 配置：DATABASE_URL / AUTH_SECRET / RESEND_API_KEY / RESEND_FROM / NEXT_PUBLIC_APP_URL
+
+## V2 用户体验优化报告
+
+基于 USER_FEEDBACK.txt 的 7 条反馈，分 5 个批次完成。
+
+### 批次0 全局基础
+- gradient-button.tsx: 默认胶囊化（rounded-full），所有 CTA 按钮圆润
+- globals.css: 新增 @keyframes fade-up + .animate-fade-up + animation-delay-100~500 + person-breathe 呼吸动画（含 prefers-reduced-motion 降级）
+
+### 批次1 首页
+- hero: h1 放大至 text-5xl~7xl，描述放大至 text-lg~xl，CTA 文案「开始测试 — 免费」→「开始测试」（px-10 py-5 text-lg），徽章 text-sm
+- 底部「准备好了吗」文本框 →「探索更多」3 个大卡片块（MBTI 博客/对比类型/统计数据，图标+标题+说明，hover 放大动画）
+- 新增 LastResultButton（client）：localStorage 有 mbti-history 时在 hero 区显示「查看上次结果 · 类型名」，点击直达 /result?data=
+- 全页 fade-up 级联出场动画
+
+### 批次2 做题页
+- 桌面端（lg+）双栏布局 lg:grid-cols-[1fr_320px]：左侧题目+上一题/下一题，右侧 60 题网格 lg:sticky 跟随滚动
+- 移动端保持单栏（题目 → 网格），网格桌面端 lg:grid-cols-4
+
+### 批次3 结果页
+- 容器 max-w-3xl → max-w-4xl lg:max-w-5xl
+- 新建 src/lib/types-visual.ts：16 型视觉配置（主色/次色/发型/眼型/嘴型/眼镜/道具）
+- 新建 src/components/shared/person-avatar.tsx：原创 SVG 人形角色（渐变发色/4 发型/2 眼型/3 嘴型/4 道具/呼吸动画），用于结果页头部 + /types/[code] 详情页
+- 卡片 p-6 → p-8 sm:p-10，列表 text-xs → text-sm，职业方向+成长建议合并 lg 双栏
+- 全页 section 级联 fade-up 出场动画，底部 4 按钮统一胶囊 + 统一 hover
+
+### 批次4 导航与历史
+- home-button → 浮动胶囊双按钮：返回上一页（router.back，history>1 时显示）+ 返回首页（左下角）
+- 新增 src/lib/local-history.ts：mbti-history localStorage（<=20 条，typeCode/typeName/createdAt/data base64），result-page 挂载时自动写入
+- proxy.ts matcher 移除 /profile 保护（仅保留 /api/profile），未登录可访问个人中心
+- profile 未登录：显示「本地测试记录」（点击 → /result?data= 回看）+ 登录引导；统计卡改用本地数据
+- test-page 顶部加「查看上次结果」入口
+
+### 验证
+| Check | Result |
+|-------|--------|
+| typecheck | ✅ |
+| lint | ✅ 0 errors 0 warnings |
+| test | ✅ 82/82（5 files） |
+| build | ✅ 43 routes（严格 TS）+ Proxy(Middleware) |
+| E2E | ✅ 55/55（9 流程，新增 Flow 9: 首页三块导航/浮动按钮/本地历史回看/未登录 profile 本地记录/PersonAvatar） |

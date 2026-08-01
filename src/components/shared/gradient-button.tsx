@@ -18,7 +18,7 @@ function gradientClasses({
   className?: string | ((state: unknown) => string | undefined)
 }) {
   return cn(
-    "relative overflow-hidden border-0 font-medium text-white shadow-lg transition-all duration-300 inline-flex items-center justify-center",
+    "relative overflow-hidden border-0 font-medium text-white shadow-lg transition-all duration-300 inline-flex items-center justify-center rounded-full",
     gradient === "primary" && "gradient-primary hover:shadow-purple-500/25",
     gradient === "accent" && "gradient-accent hover:shadow-rose-500/25",
     gradient === "gold" && "bg-[#d4a853] hover:bg-[#e0b963] text-[#0a0a12]",

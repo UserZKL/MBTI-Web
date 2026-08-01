@@ -162,6 +162,83 @@ test.describe("Flow 8: Legal Pages & 404", () => {
   })
 })
 
+test.describe("Flow 9: V2 Homepage & Navigation", () => {
+  test("should show explore cards linking to blog/compare/stats", async ({ page }) => {
+    await page.goto("/")
+    await expect(page.getByRole("link", { name: /MBTI 博客/ }).first()).toBeVisible()
+    await expect(page.getByRole("link", { name: /对比类型/ }).first()).toBeVisible()
+    await expect(page.getByRole("link", { name: /统计数据/ }).first()).toBeVisible()
+
+    await page.getByRole("link", { name: /MBTI 博客/ }).first().click()
+    await page.waitForURL("/blog")
+    await expect(page.locator("h1")).toContainText("博客")
+
+    await page.goto("/")
+    await page.getByRole("link", { name: /对比类型/ }).first().click()
+    await page.waitForURL("/compare")
+    await expect(page.locator("h1")).toContainText("对比")
+
+    await page.goto("/")
+    await page.getByRole("link", { name: /统计数据/ }).first().click()
+    await page.waitForURL("/stats")
+    await expect(page.locator("h1")).toContainText("统计")
+  })
+
+  test("should show floating back/home buttons on subpages", async ({ page }) => {
+    await page.goto("/types")
+    await expect(page.getByRole("link", { name: "返回首页" })).toBeVisible()
+    await expect(page.getByRole("button", { name: "返回上一页" })).toBeVisible()
+  })
+
+  test("should show last result entry from localStorage on homepage", async ({ page }) => {
+    const data = Buffer.from(
+      JSON.stringify(Array.from({ length: 60 }, (_, i) => ({ questionId: i + 1, answer: "agree" })))
+    ).toString("base64")
+    await page.addInitScript(
+      (d) => {
+        localStorage.setItem(
+          "mbti-history",
+          JSON.stringify([{ typeCode: "INTJ", typeName: "建筑师", createdAt: new Date().toISOString(), data: d }])
+        )
+      },
+      data
+    )
+    await page.goto("/")
+    await expect(page.getByRole("link", { name: /查看上次结果/ })).toBeVisible()
+    await page.getByRole("link", { name: /查看上次结果/ }).click()
+    await page.waitForURL("/result?data=*")
+    await expect(page.locator("h1")).toBeVisible()
+  })
+
+  test("should show local history on profile when not logged in", async ({ page }) => {
+    const data = Buffer.from(
+      JSON.stringify(Array.from({ length: 60 }, (_, i) => ({ questionId: i + 1, answer: "disagree" })))
+    ).toString("base64")
+    await page.addInitScript(
+      (d) => {
+        localStorage.setItem(
+          "mbti-history",
+          JSON.stringify([{ typeCode: "ESFP", typeName: "表演者", createdAt: new Date().toISOString(), data: d }])
+        )
+      },
+      data
+    )
+
+    await page.goto("/profile")
+    await expect(page.locator("h1")).toContainText("未登录用户")
+    await expect(page.getByText("本地测试记录")).toBeVisible()
+    await expect(page.getByRole("link", { name: /查看 表演者 测试结果/ })).toBeVisible()
+  })
+
+  test("should show PersonAvatar on result page", async ({ page }) => {
+    const data = Buffer.from(
+      JSON.stringify(Array.from({ length: 60 }, (_, i) => ({ questionId: i + 1, answer: "agree" })))
+    ).toString("base64")
+    await page.goto(`/result?data=${data}`)
+    await expect(page.getByRole("img", { name: /人格形象/ })).toBeVisible()
+  })
+})
+
 test.describe("Flow 5: Responsive Breakpoints", () => {
   for (const device of DEVICE_SIZES) {
     for (const pageInfo of CRITICAL_PAGES) {

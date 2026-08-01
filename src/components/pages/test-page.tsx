@@ -6,6 +6,7 @@ import Link from "next/link"
 import { ProgressBar } from "@/components/shared/progress-bar"
 import { GlassCard } from "@/components/shared/glass-card"
 import { Button } from "@/components/ui/button"
+import { LastResultButton } from "@/components/shared/last-result-button"
 import { getQuestions, type Answer, type Question } from "@/lib/mbti-utils"
 import { ChevronLeft, ChevronRight, Home } from "lucide-react"
 
@@ -170,18 +171,21 @@ export function TestPage() {
       )}
 
       {/* Header */}
-      <div className="w-full max-w-2xl pt-8">
+      <div className="w-full max-w-5xl pt-8">
         <div className="mb-2 flex items-center justify-between">
           <span className="text-sm tabular-nums text-[var(--color-text-tertiary)]">
             {currentIndex + 1} / {questions.length}
           </span>
-          <Link
-            href="/"
-            aria-label="返回首页"
-            className="flex items-center gap-1 text-sm text-[var(--color-text-tertiary)] transition-colors hover:text-white"
-          >
-            <Home className="size-4" aria-hidden="true" />
-          </Link>
+          <div className="flex items-center gap-3">
+            <LastResultButton />
+            <Link
+              href="/"
+              aria-label="返回首页"
+              className="flex items-center gap-1 text-sm text-[var(--color-text-tertiary)] transition-colors hover:text-white"
+            >
+              <Home className="size-4" aria-hidden="true" />
+            </Link>
+          </div>
         </div>
 
         <ProgressBar
@@ -192,110 +196,114 @@ export function TestPage() {
         />
       </div>
 
-      {/* Question Card */}
-      <div className="mt-6 flex w-full max-w-2xl flex-1 flex-col items-center">
-        <div
-          className="w-full transition-all duration-300"
-          style={{
-            opacity: isTransitioning ? 0 : 1,
-            transform: isTransitioning ? "translateY(8px)" : "translateY(0)",
-          }}
-        >
-          <GlassCard variant="prominent" className="p-8 sm:p-14">
-            {/* Question number badge */}
-            <div className="mb-6 inline-flex items-center gap-1.5 rounded-full border border-white/8 bg-white/[0.02] px-4 py-1.5 text-sm text-[var(--color-text-tertiary)]">
-              第 {currentIndex + 1} 题
-            </div>
-
-            {/* Question text */}
-            <h2 className="mb-12 text-2xl font-medium leading-relaxed text-[var(--color-text-primary)] sm:text-3xl">
-              {currentQuestion.text}
-            </h2>
-
-            {/* Answer buttons */}
-            <div className="flex gap-4">
-              <Button
-                onClick={() => handleAnswer("agree")}
-                className="gradient-primary flex-1 border-0 py-8 text-lg font-medium text-white shadow-lg transition-all duration-200 hover:scale-[1.02] hover:shadow-[0_0_30px_rgba(124,58,237,0.3)] active:scale-[0.98]"
-              >
-                符合
-              </Button>
-              <Button
-                onClick={() => handleAnswer("disagree")}
-                variant="outline"
-                className="flex-1 border-white/8 bg-white/[0.02] py-8 text-lg font-medium text-[var(--color-text-secondary)] transition-all duration-200 hover:scale-[1.02] hover:border-white/15 hover:bg-white/[0.04] active:scale-[0.98]"
-              >
-                不符合
-              </Button>
-            </div>
-          </GlassCard>
-        </div>
-
-        {/* Prev / Next navigation buttons */}
-        <div className="mt-6 flex w-full gap-4">
-          <Button
-            onClick={handleGoBack}
-            disabled={currentIndex === 0}
-            variant="outline"
-            className="flex-1 border-white/8 bg-white/[0.02] py-4 text-base font-medium text-[var(--color-text-secondary)] transition-all duration-200 hover:border-white/15 hover:bg-white/[0.04] disabled:opacity-30"
+      {/* Main layout: question left, grid right (desktop) */}
+      <div className="mt-6 w-full max-w-5xl flex-1 lg:grid lg:grid-cols-[1fr_320px] lg:items-start lg:gap-6">
+        <div className="flex flex-col items-center lg:items-stretch">
+          <div
+            className="w-full max-w-2xl transition-all duration-300 lg:max-w-none"
+            style={{
+              opacity: isTransitioning ? 0 : 1,
+              transform: isTransitioning ? "translateY(8px)" : "translateY(0)",
+            }}
           >
-            <ChevronLeft className="size-5" aria-hidden="true" />
-            上一题
-          </Button>
-          <Button
-            onClick={handleGoNext}
-            disabled={currentIndex + 1 >= questions.length}
-            variant="outline"
-            className="flex-1 border-white/8 bg-white/[0.02] py-4 text-base font-medium text-[var(--color-text-secondary)] transition-all duration-200 hover:border-white/15 hover:bg-white/[0.04] disabled:opacity-30"
-          >
-            下一题
-            <ChevronRight className="size-5" aria-hidden="true" />
-          </Button>
+            <GlassCard variant="prominent" className="p-8 sm:p-14">
+              {/* Question number badge */}
+              <div className="mb-6 inline-flex items-center gap-1.5 rounded-full border border-white/8 bg-white/[0.02] px-4 py-1.5 text-sm text-[var(--color-text-tertiary)]">
+                第 {currentIndex + 1} 题
+              </div>
+
+              {/* Question text */}
+              <h2 className="mb-12 text-2xl font-medium leading-relaxed text-[var(--color-text-primary)] sm:text-3xl">
+                {currentQuestion.text}
+              </h2>
+
+              {/* Answer buttons */}
+              <div className="flex gap-4">
+                <Button
+                  onClick={() => handleAnswer("agree")}
+                  className="gradient-primary flex-1 border-0 py-8 text-lg font-medium text-white shadow-lg transition-all duration-200 hover:scale-[1.02] hover:shadow-[0_0_30px_rgba(124,58,237,0.3)] active:scale-[0.98]"
+                >
+                  符合
+                </Button>
+                <Button
+                  onClick={() => handleAnswer("disagree")}
+                  variant="outline"
+                  className="flex-1 border-white/8 bg-white/[0.02] py-8 text-lg font-medium text-[var(--color-text-secondary)] transition-all duration-200 hover:scale-[1.02] hover:border-white/15 hover:bg-white/[0.04] active:scale-[0.98]"
+                >
+                  不符合
+                </Button>
+              </div>
+            </GlassCard>
+          </div>
+
+          {/* Prev / Next navigation buttons */}
+          <div className="mt-6 flex w-full max-w-2xl gap-4 lg:max-w-none">
+            <Button
+              onClick={handleGoBack}
+              disabled={currentIndex === 0}
+              variant="outline"
+              className="flex-1 border-white/8 bg-white/[0.02] py-4 text-base font-medium text-[var(--color-text-secondary)] transition-all duration-200 hover:border-white/15 hover:bg-white/[0.04] disabled:opacity-30"
+            >
+              <ChevronLeft className="size-5" aria-hidden="true" />
+              上一题
+            </Button>
+            <Button
+              onClick={handleGoNext}
+              disabled={currentIndex + 1 >= questions.length}
+              variant="outline"
+              className="flex-1 border-white/8 bg-white/[0.02] py-4 text-base font-medium text-[var(--color-text-secondary)] transition-all duration-200 hover:border-white/15 hover:bg-white/[0.04] disabled:opacity-30"
+            >
+              下一题
+              <ChevronRight className="size-5" aria-hidden="true" />
+            </Button>
+          </div>
+
+          {/* Tips */}
+          <p className="mt-6 max-w-2xl text-center text-sm text-[var(--color-text-tertiary)] lg:max-w-none">
+            凭第一反应作答，没有对错之分
+          </p>
+
+          {incompleteNotice && (
+            <div className="mt-3 w-full max-w-2xl rounded-lg border border-[var(--color-brand-amber)]/30 bg-[var(--color-brand-amber)]/10 px-4 py-3 text-center text-sm text-[var(--color-brand-amber)] lg:max-w-none">
+              还有 {questions.length - new Set(answers.map((a) => a.questionId)).size} 题未作答，已跳转到最近的未答题，请完成全部题目
+            </div>
+          )}
         </div>
 
         {/* 60-question grid navigator */}
-        <GlassCard variant="subtle" className="mt-6 w-full p-5">
-          <div className="mb-3 flex items-center justify-between">
-            <span className="text-sm text-[var(--color-text-secondary)]">答题进度</span>
-            <span className="text-sm tabular-nums text-[var(--color-brand-cyan)]">
-              已答 {answers.length} / {questions.length}
-            </span>
-          </div>
-          <div className="grid grid-cols-5 gap-1.5 sm:grid-cols-10">
-            {questions.map((q, i) => {
-              const isAnswered = answeredIds.has(q.id)
-              const isCurrent = i === currentIndex
-              return (
-                <button
-                  key={q.id}
-                  onClick={() => handleJump(i)}
-                  aria-label={`第 ${i + 1} 题${isAnswered ? "（已作答）" : ""}`}
-                  aria-current={isCurrent ? "true" : undefined}
-                  className={`flex h-9 items-center justify-center rounded-md text-sm font-medium tabular-nums transition-all duration-200 ${
-                    isCurrent
-                      ? "border-2 border-[var(--color-brand-gold)] bg-white/[0.06] text-[var(--color-brand-gold)]"
-                      : isAnswered
-                        ? "gradient-primary text-white shadow-md"
-                        : "border border-white/8 bg-white/[0.02] text-[var(--color-text-tertiary)] hover:border-white/20 hover:text-white"
-                  }`}
-                >
-                  {i + 1}
-                </button>
-              )
-            })}
-          </div>
-        </GlassCard>
-
-        {/* Tips */}
-        <p className="mt-6 text-center text-sm text-[var(--color-text-tertiary)]">
-          凭第一反应作答，没有对错之分
-        </p>
-
-        {incompleteNotice && (
-          <div className="mt-3 w-full rounded-lg border border-[var(--color-brand-amber)]/30 bg-[var(--color-brand-amber)]/10 px-4 py-3 text-center text-sm text-[var(--color-brand-amber)]">
-            还有 {questions.length - new Set(answers.map((a) => a.questionId)).size} 题未作答，已跳转到最近的未答题，请完成全部题目
-          </div>
-        )}
+        <div className="lg:sticky lg:top-8">
+          <GlassCard variant="subtle" className="mt-6 w-full p-5 lg:mt-0">
+            <div className="mb-3 flex items-center justify-between">
+              <span className="text-sm text-[var(--color-text-secondary)]">答题进度</span>
+              <span className="text-sm tabular-nums text-[var(--color-brand-cyan)]">
+                已答 {answers.length} / {questions.length}
+              </span>
+            </div>
+            <div className="grid grid-cols-5 gap-1.5 sm:grid-cols-10 lg:grid-cols-4">
+              {questions.map((q, i) => {
+                const isAnswered = answeredIds.has(q.id)
+                const isCurrent = i === currentIndex
+                return (
+                  <button
+                    key={q.id}
+                    onClick={() => handleJump(i)}
+                    aria-label={`第 ${i + 1} 题${isAnswered ? "（已作答）" : ""}`}
+                    aria-current={isCurrent ? "true" : undefined}
+                    className={`flex h-9 items-center justify-center rounded-md text-sm font-medium tabular-nums transition-all duration-200 ${
+                      isCurrent
+                        ? "border-2 border-[var(--color-brand-gold)] bg-white/[0.06] text-[var(--color-brand-gold)]"
+                        : isAnswered
+                          ? "gradient-primary text-white shadow-md"
+                          : "border border-white/8 bg-white/[0.02] text-[var(--color-text-tertiary)] hover:border-white/20 hover:text-white"
+                    }`}
+                  >
+                    {i + 1}
+                  </button>
+                )
+              })}
+            </div>
+          </GlassCard>
+        </div>
       </div>
     </div>
   )

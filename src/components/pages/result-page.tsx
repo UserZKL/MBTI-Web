@@ -12,6 +12,8 @@ import { TypeBadge } from "@/components/shared/type-badge"
 import { calculateResult, getPersonalityTypeData, type Answer } from "@/lib/mbti-utils"
 import { type MbtiResult } from "@/lib/mbti-utils"
 import { drawResultCard, downloadDataUrl } from "@/lib/export-card"
+import { PersonAvatar } from "@/components/shared/person-avatar"
+import { writeLocalHistory } from "@/lib/local-history"
 import {
   Share2, RefreshCw, Users, Briefcase, Heart, TrendingUp,
   Sparkles, Loader2, ImageDown
@@ -80,6 +82,18 @@ export function ResultPage() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  const historySaved = useRef(false)
+  useEffect(() => {
+    if (resultRef.current && dataParam && !historySaved.current) {
+      historySaved.current = true
+      writeLocalHistory({
+        typeCode: resultRef.current.type,
+        typeName: resultRef.current.typeName,
+        data: dataParam,
+      })
+    }
+  }, [dataParam])
 
   const handleGenerateReport = async () => {
     if (!result || reportState === "loading") return
@@ -166,17 +180,18 @@ export function ResultPage() {
         <div className="absolute bottom-0 left-0 h-[400px] w-[400px] rounded-full bg-[var(--color-brand-cyan)]/3 blur-[100px]" />
       </div>
 
-      <div className="mx-auto max-w-3xl px-4 pt-10">
+      <div className="mx-auto max-w-4xl px-4 pt-10 lg:max-w-5xl">
         {/* Type Header */}
         <section className="mb-10 text-center">
-          <TypeBadge type={result.type} size="lg" className="mb-4" />
-          <GradientText as="h1" className="mb-3 text-3xl font-bold sm:text-4xl">
+          <PersonAvatar type={result.type} size={140} className="mx-auto mb-5 animate-fade-up" />
+          <TypeBadge type={result.type} size="lg" className="mb-4 animate-fade-up animation-delay-100" />
+          <GradientText as="h1" className="mb-3 text-3xl font-bold animate-fade-up animation-delay-200 sm:text-4xl">
             {result.typeName}
           </GradientText>
-          <p className="mx-auto max-w-md text-sm leading-relaxed text-[var(--color-text-secondary)]">
+          <p className="mx-auto max-w-xl text-sm leading-relaxed text-[var(--color-text-secondary)] animate-fade-up animation-delay-300 sm:text-base">
             {typeData?.description ?? "你是一个独特而复杂的人，拥有自己的思维方式和行为模式。"}
           </p>
-          <p className="mt-3 text-xs text-[var(--color-text-tertiary)]">
+          <p className="mt-3 text-xs text-[var(--color-text-tertiary)] animate-fade-up animation-delay-300">
             置信度：{result.confidence}% · {confidenceLabel}
             {saveState === "saved" && <span className="ml-2 text-[var(--color-success)]">· 已保存</span>}
             {saveState === "error" && (
@@ -194,11 +209,11 @@ export function ResultPage() {
         </section>
 
         {/* Dimension Scores */}
-        <section className="mb-10">
+        <section className="mb-10 animate-fade-up animation-delay-200">
           <h2 className="mb-5 text-lg font-semibold text-[var(--color-text-primary)]">
             维度得分
           </h2>
-          <GlassCard variant="default" className="p-6">
+          <GlassCard variant="default" className="p-8 sm:p-10">
             <ResultChart
               dimensions={result.dimensions.map((dim) => ({
                 code: dim.code,
@@ -207,7 +222,7 @@ export function ResultPage() {
               }))}
               className="mb-6"
             />
-            <div className="space-y-4 border-t border-white/[0.06] pt-5">
+            <div className="space-y-4 border-t border-white/[0.06] pt-6">
               {result.dimensions.map((dim) => (
                 <DimensionBar
                   key={dim.code}
@@ -229,31 +244,31 @@ export function ResultPage() {
 
         {/* Strengths & Weaknesses */}
         {typeData && (
-          <section className="mb-10 grid gap-5 sm:grid-cols-2">
-            <GlassCard variant="subtle" className="p-6">
-              <div className="mb-3 flex items-center gap-2">
+          <section className="mb-10 grid gap-5 animate-fade-up animation-delay-300 sm:grid-cols-2">
+            <GlassCard variant="subtle" className="p-8">
+              <div className="mb-4 flex items-center gap-2">
                 <TrendingUp className="size-4 text-[var(--color-success)]" />
-                <h3 className="text-sm font-semibold text-[var(--color-text-primary)]">你的优势</h3>
+                <h3 className="text-base font-semibold text-[var(--color-text-primary)]">你的优势</h3>
               </div>
-              <ul className="space-y-2">
+              <ul className="space-y-2.5">
                 {typeData.strengths.map((s) => (
-                  <li key={s} className="flex items-start gap-2 text-xs text-[var(--color-text-secondary)]">
-                    <span className="mt-1 block size-1 shrink-0 rounded-full bg-[var(--color-brand-cyan)]" />
+                  <li key={s} className="flex items-start gap-2.5 text-sm leading-relaxed text-[var(--color-text-secondary)]">
+                    <span className="mt-1.5 block size-1.5 shrink-0 rounded-full bg-[var(--color-brand-cyan)]" />
                     {s}
                   </li>
                 ))}
               </ul>
             </GlassCard>
 
-            <GlassCard variant="subtle" className="p-6">
-              <div className="mb-3 flex items-center gap-2">
+            <GlassCard variant="subtle" className="p-8">
+              <div className="mb-4 flex items-center gap-2">
                 <RefreshCw className="size-4 text-[var(--color-brand-amber)]" />
-                <h3 className="text-sm font-semibold text-[var(--color-text-primary)]">成长空间</h3>
+                <h3 className="text-base font-semibold text-[var(--color-text-primary)]">成长空间</h3>
               </div>
-              <ul className="space-y-2">
+              <ul className="space-y-2.5">
                 {typeData.weaknesses.map((s) => (
-                  <li key={s} className="flex items-start gap-2 text-xs text-[var(--color-text-secondary)]">
-                    <span className="mt-1 block size-1 shrink-0 rounded-full bg-[var(--color-brand-amber)]" />
+                  <li key={s} className="flex items-start gap-2.5 text-sm leading-relaxed text-[var(--color-text-secondary)]">
+                    <span className="mt-1.5 block size-1.5 shrink-0 rounded-full bg-[var(--color-brand-amber)]" />
                     {s}
                   </li>
                 ))}
@@ -262,77 +277,76 @@ export function ResultPage() {
           </section>
         )}
 
-        {/* Career */}
+        {/* Career & Growth */}
         {typeData && (
-          <section className="mb-10">
-            <div className="mb-5 flex items-center gap-2">
-              <Briefcase className="size-4 text-[var(--color-brand-purple)]" />
-              <h2 className="text-lg font-semibold text-[var(--color-text-primary)]">职业方向</h2>
-            </div>
-            <GlassCard variant="subtle" className="p-6">
-              <div className="flex flex-wrap gap-2">
-                {typeData.careers.map((c) => (
-                  <span
-                    key={c}
-                    className="rounded-full border border-white/8 bg-white/[0.02] px-3 py-1 text-xs text-[var(--color-text-secondary)]"
-                  >
-                    {c}
-                  </span>
-                ))}
+          <section className="mb-10 grid gap-5 animate-fade-up animation-delay-400 lg:grid-cols-2">
+            <section>
+              <div className="mb-5 flex items-center gap-2">
+                <Briefcase className="size-4 text-[var(--color-brand-purple)]" />
+                <h2 className="text-lg font-semibold text-[var(--color-text-primary)]">职业方向</h2>
               </div>
-            </GlassCard>
+              <GlassCard variant="subtle" className="h-full p-8">
+                <div className="flex flex-wrap gap-2">
+                  {typeData.careers.map((c) => (
+                    <span
+                      key={c}
+                      className="rounded-full border border-white/8 bg-white/[0.02] px-3.5 py-1.5 text-sm text-[var(--color-text-secondary)]"
+                    >
+                      {c}
+                    </span>
+                  ))}
+                </div>
+              </GlassCard>
+            </section>
+
+            <section>
+              <div className="mb-5 flex items-center gap-2">
+                <Users className="size-4 text-[var(--color-brand-cyan)]" />
+                <h2 className="text-lg font-semibold text-[var(--color-text-primary)]">成长建议</h2>
+              </div>
+              <GlassCard variant="subtle" className="h-full p-8">
+                <ul className="space-y-2.5">
+                  {typeData.growth.map((g) => (
+                    <li key={g} className="flex items-start gap-2.5 text-sm leading-relaxed text-[var(--color-text-secondary)]">
+                      <span className="mt-1.5 block size-1.5 shrink-0 rounded-full bg-[var(--color-success)]" />
+                      {g}
+                    </li>
+                  ))}
+                </ul>
+              </GlassCard>
+            </section>
           </section>
         )}
 
         {/* Relationships */}
         {typeData && (
-          <section className="mb-10">
+          <section className="mb-10 animate-fade-up animation-delay-400">
             <div className="mb-5 flex items-center gap-2">
               <Heart className="size-4 text-[var(--color-brand-rose)]" />
               <h2 className="text-lg font-semibold text-[var(--color-text-primary)]">人际关系</h2>
             </div>
-            <GlassCard variant="subtle" className="space-y-4 p-6">
+            <GlassCard variant="subtle" className="space-y-5 p-8">
               {Object.entries(typeData.relationships).map(([key, val]) => (
                 <div key={key}>
-                  <h3 className="mb-1 text-xs font-medium text-[var(--color-brand-gold)]">
+                  <h3 className="mb-1.5 text-sm font-medium text-[var(--color-brand-gold)]">
                     {key === "romantic" ? "亲密关系" : key === "friendship" ? "朋友相处" : "职场互动"}
                   </h3>
-                  <p className="text-xs leading-relaxed text-[var(--color-text-secondary)]">{val}</p>
+                  <p className="text-sm leading-relaxed text-[var(--color-text-secondary)]">{val}</p>
                 </div>
               ))}
             </GlassCard>
           </section>
         )}
 
-        {/* Growth */}
-        {typeData && (
-          <section className="mb-10">
-            <div className="mb-5 flex items-center gap-2">
-              <Users className="size-4 text-[var(--color-brand-cyan)]" />
-              <h2 className="text-lg font-semibold text-[var(--color-text-primary)]">成长建议</h2>
-            </div>
-            <GlassCard variant="subtle" className="p-6">
-              <ul className="space-y-2">
-                {typeData.growth.map((g) => (
-                  <li key={g} className="flex items-start gap-2 text-xs text-[var(--color-text-secondary)]">
-                    <span className="mt-1 block size-1 shrink-0 rounded-full bg-[var(--color-success)]" />
-                    {g}
-                  </li>
-                ))}
-              </ul>
-            </GlassCard>
-          </section>
-        )}
-
         {/* AI Report Section */}
-        <section className="mb-10">
+        <section className="mb-10 animate-fade-up animation-delay-500">
           <div className="mb-5 flex items-center gap-2">
             <Sparkles className="size-4 text-[var(--color-brand-cyan)]" />
             <h2 className="text-lg font-semibold text-[var(--color-text-primary)]">AI 深度分析</h2>
           </div>
 
           {!showReport ? (
-            <GlassCard variant="subtle" className="p-8 text-center">
+            <GlassCard variant="subtle" className="p-10 text-center">
               <Sparkles className="mx-auto mb-3 size-8 text-[var(--color-brand-purple)]" />
               <p className="mb-4 text-sm text-[var(--color-text-secondary)]">
                 基于你的测试结果，AI 将生成一份专属的深度分析报告
@@ -340,7 +354,7 @@ export function ResultPage() {
               <GradientButton
                 onClick={handleGenerateReport}
                 disabled={reportState === "loading"}
-                className="flex items-center gap-2"
+                className="flex items-center gap-2 px-6 py-3"
                 glow
               >
                 <Sparkles className="size-4" />
@@ -359,14 +373,14 @@ export function ResultPage() {
               <GradientButton
                 variant="outline"
                 onClick={handleGenerateReport}
-                className="flex items-center gap-2"
+                className="flex items-center gap-2 px-6 py-3"
               >
                 <RefreshCw className="size-4" />
                 重试
               </GradientButton>
             </GlassCard>
           ) : reportText ? (
-            <GlassCard variant="subtle" className="prose-p:!my-0 p-6 text-sm leading-relaxed text-[var(--color-text-secondary)]">
+            <GlassCard variant="subtle" className="prose-p:!my-0 p-8 text-base leading-relaxed text-[var(--color-text-secondary)] sm:p-10">
               {reportText.split("\n").map((line, i) => (
                 <p key={i} className="mb-3 last:mb-0">
                   {line || "\u00A0"}
@@ -377,21 +391,21 @@ export function ResultPage() {
         </section>
 
         {/* Action Buttons */}
-        <section className="flex flex-col items-center gap-3 pb-10 sm:flex-row sm:justify-center sm:flex-wrap">
+        <section className="flex flex-col items-center gap-4 pb-10 sm:flex-row sm:justify-center sm:flex-wrap">
           <GradientLink
             href="/types"
-            className="bg-white/[0.02] text-[var(--color-text-secondary)]"
+            className="bg-white/[0.02] px-6 py-3 text-[var(--color-text-secondary)] hover:bg-white/[0.06] hover:text-white"
           >
             查看所有类型
           </GradientLink>
-          <GradientLink href="/test" glow>
+          <GradientLink href="/test" glow className="px-6 py-3">
             再测一次
           </GradientLink>
           <GradientLink
             href={`/share/${result.type}`}
             gradient="gold"
             glow
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 px-6 py-3"
           >
             <Share2 className="size-4" />
             分享结果
@@ -400,7 +414,7 @@ export function ResultPage() {
             variant="outline"
             onClick={handleDownloadImage}
             disabled={downloadState === "loading"}
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 px-6 py-3"
           >
             {downloadState === "loading" ? (
               <Loader2 className="size-4 animate-spin" aria-hidden="true" />
