@@ -42,7 +42,11 @@ Windows 用户注意：本项目的构建脚本使用 `--webpack` 标志（Turbo
 
 按顺序执行下面的每一步即可在本地把网站跑起来。
 
-### 第 1 步：下载代码
+### 方式一：手动执行
+
+以下为传统的手动操作流程，适合希望逐步了解项目结构的情况。
+
+#### 第 1 步：下载代码
 
 打开终端（macOS/Linux 用 Terminal，Windows 用 PowerShell 或 CMD），执行：
 
@@ -111,6 +115,58 @@ npm test            # 单元测试（86 项）
 npm run build       # 生产构建
 ```
 
+### 方式二：使用 AI Agent 一键运行（Claude Code / Codex / OpenCode）
+
+如果你安装了任一 AI 编程助手 CLI，可以让它替你完成「下载 → 装依赖 → 配环境 → 启动」的整个流程。AI 会读取本 README 中的手动步骤并逐条执行，效果与手动操作一致。
+
+前提：本机已安装对应 CLI 工具，且已登录账号（未安装时先执行下面的安装命令，任意一种即可）。
+
+#### 使用 Claude Code
+
+```bash
+# 安装（如未安装）：npm install -g @anthropic-ai/claude-code
+git clone https://github.com/UserZKL/MBTI-Web.git
+cd MBTI-Web
+claude
+```
+
+在 Claude Code 对话中输入：
+
+> 请阅读项目 README 中「从 GitHub 拉取并运行」章节，按步骤完成初始化并启动：安装依赖（npm install）、复制 .env.example 为 .env 并生成随机 AUTH_SECRET、执行数据库迁移（npm run db:migrate），最后启动开发服务器（npm run dev）。
+
+#### 使用 Codex CLI
+
+```bash
+# 安装（如未安装）：npm install -g @openai/codex
+git clone https://github.com/UserZKL/MBTI-Web.git
+cd MBTI-Web
+codex
+```
+
+在 Codex 对话中输入：
+
+> 按 README 的「从 GitHub 拉取并运行」章节初始化项目：npm install、生成 .env（AUTH_SECRET 用随机值）、npm run db:migrate、npm run dev，然后告诉我访问地址。
+
+#### 使用 OpenCode CLI
+
+```bash
+# 安装（如未安装）：npm install -g opencode-ai
+git clone https://github.com/UserZKL/MBTI-Web.git
+cd MBTI-Web
+opencode
+```
+
+在 OpenCode 对话中输入：
+
+> 请初始化并运行此项目：依据 README 手动流程依次执行 npm install、创建 .env 并生成随机 AUTH_SECRET、npm run db:migrate、npm run dev。
+
+#### 注意事项
+
+- **端口与终端**：启动成功后终端会停留在运行状态，属正常现象；保持终端开启，浏览器访问 http://localhost:3000 即可
+- **API Key 后补**：`DEEPSEEK_API_KEY`、`RESEND_API_KEY` 可稍后手动填入 `.env` 并重启服务器（见下文对应章节）
+- **AI 无法联网时**：若 AI 工具无法访问 GitHub，请先手动执行 `git clone` 再进入目录启动 CLI
+- **安全**：`.env` 在 `.gitignore` 中，AI 修改它不会影响仓库内容
+
 ## 配置「AI 深度分析」报告（DeepSeek API Key）
 
 结果页的 **生成 AI 报告** 按钮会调用 DeepSeek 大模型，根据你的测试数据生成个性化深度报告。要让这个功能可用，需要完成以下配置：
@@ -165,18 +221,6 @@ npm run dev
 2. 进入「API Keys」创建 Key（形如 `re_` 开头），填入 `.env` 的 `RESEND_API_KEY`
 3. 默认发件人 `onboarding@resend.dev` 可直接使用；绑定自有域名后可在 `RESEND_FROM` 填你的地址
 4. 重启 `npm run dev`，登录页输入邮箱 → 收到 6 位验证码 → 完成登录
-
-## 部署上线（Vercel）
-
-1. 把本仓库推送到 GitHub 后，打开 https://vercel.com/new 导入该仓库
-2. 构建命令与输出目录使用默认值（Next.js 自动识别）
-3. 在项目设置 → Environment Variables 中配置以下变量（与本地 `.env` 相同）：
-   - `DATABASE_URL` — Vercel 无本地磁盘，需改用托管数据库（如 Vercel Postgres / Neon / Supabase 的 SQLite 兼容方案）
-   - `AUTH_SECRET` — 随机生成的字符串
-   - `NEXT_PUBLIC_APP_URL` — **必须设为你的正式域名**（如 `https://xxx.vercel.app`），否则分享预览、站点地图会指向占位域名
-   - `DEEPSEEK_API_KEY` — 如需 AI 报告功能
-   - `RESEND_API_KEY` / `RESEND_FROM` — 如需邮箱登录
-4. 点击 Deploy，完成
 
 ## 项目结构
 
