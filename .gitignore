@@ -53,3 +53,6 @@ skills-lock.json
 
 # local database
 *.db
+
+# local agent config
+AGENTS.md
