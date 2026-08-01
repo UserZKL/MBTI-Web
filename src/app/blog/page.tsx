@@ -28,7 +28,7 @@ export default function BlogPage() {
         <div className="absolute bottom-0 left-0 h-[300px] w-[300px] rounded-full bg-[var(--color-brand-cyan)]/3 blur-[80px]" />
       </div>
 
-      <div className="mx-auto max-w-3xl px-4 py-16 sm:py-20">
+      <div className="container-page py-16 sm:py-20">
         <div className="mb-12">
           <GradientText as="h1" className="mb-3 text-3xl font-bold">
             MBTI 博客

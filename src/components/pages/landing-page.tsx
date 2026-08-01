@@ -4,6 +4,7 @@ import { GradientLink } from "@/components/shared/gradient-button"
 import { GlassCard } from "@/components/shared/glass-card"
 import { TypeBadge } from "@/components/shared/type-badge"
 import { LastResultButton } from "@/components/shared/last-result-button"
+import { Reveal } from "@/components/shared/reveal"
 import { getAllPersonalityTypes } from "@/lib/mbti-utils"
 import { Hash, TrendingUp, Brain, Lightbulb, BookOpen, Scale, BarChart3 } from "lucide-react"
 
@@ -66,15 +67,18 @@ const EXPLORE_LINKS = [
   },
 ]
 
+const CONTAINER = "container-page"
+
 export function LandingPage() {
   const types = getAllPersonalityTypes()
 
   return (
     <div className="relative min-h-screen overflow-x-clip">
-      {/* Background ambient glow */}
-      <div className="pointer-events-none fixed inset-0 -z-10">
-        <div className="absolute -top-40 left-1/2 h-[600px] w-[800px] -translate-x-1/2 rounded-full bg-[var(--color-brand-purple)]/5 blur-[120px]" />
-        <div className="absolute top-1/3 right-0 h-[400px] w-[500px] rounded-full bg-[var(--color-brand-cyan)]/4 blur-[100px]" />
+      {/* Dynamic ambient background */}
+      <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
+        <div className="bg-drift-1 absolute -top-40 left-1/2 h-[600px] w-[800px] -translate-x-1/2 rounded-full bg-[var(--color-brand-purple)]/6 blur-[120px]" />
+        <div className="bg-drift-2 absolute top-1/3 right-0 h-[400px] w-[500px] rounded-full bg-[var(--color-brand-cyan)]/5 blur-[100px]" />
+        <div className="bg-drift-3 absolute bottom-0 left-[-10%] h-[500px] w-[600px] rounded-full bg-[var(--color-brand-gold)]/4 blur-[110px]" />
       </div>
 
       {/* Hero Section */}
@@ -106,111 +110,106 @@ export function LandingPage() {
       </section>
 
       {/* Dimensions Section */}
-      <section className="mx-auto max-w-6xl px-4 pb-24">
-        <div className="mb-12 text-center">
-          <GradientText as="h2" className="mb-3 text-2xl font-bold sm:text-3xl">
+      <section className={`${CONTAINER} pb-24`}>
+        <Reveal className="mb-12 text-center">
+          <GradientText as="h2" className="mb-3 text-3xl font-bold sm:text-4xl">
             四个维度，十六种可能
           </GradientText>
-          <p className="text-sm text-[var(--color-text-secondary)]">
+          <p className="text-base text-[var(--color-text-secondary)]">
             MBTI 用四个维度描绘你的性格画像
           </p>
-        </div>
+        </Reveal>
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {DIMENSIONS.map((dim) => (
-            <GlassCard key={dim.pair} variant="subtle" hover className="p-5">
-              <div className="mb-3 flex size-9 items-center justify-center rounded-lg bg-white/[0.04]">
-                <dim.icon className="size-4 text-[var(--color-brand-purple)]" />
-              </div>
-              <h3 className="mb-1 text-sm font-semibold text-[var(--color-text-primary)]">
-                {dim.label}
-              </h3>
-              <p className="mb-2 text-xs font-mono text-[var(--color-brand-gold)]">
-                {dim.pair}
-              </p>
-              <p className="text-xs leading-relaxed text-[var(--color-text-tertiary)]">
-                {dim.desc}
-              </p>
-            </GlassCard>
+          {DIMENSIONS.map((dim, i) => (
+            <Reveal key={dim.pair} direction="left" delay={i * 120}>
+              <GlassCard variant="subtle" hover className="h-full p-6">
+                <div className="mb-3 flex size-10 items-center justify-center rounded-lg bg-white/[0.04]">
+                  <dim.icon className="size-5 text-[var(--color-brand-purple)]" />
+                </div>
+                <h3 className="mb-1 text-base font-semibold text-[var(--color-text-primary)]">
+                  {dim.label}
+                </h3>
+                <p className="mb-2 text-sm font-mono text-[var(--color-brand-gold)]">
+                  {dim.pair}
+                </p>
+                <p className="text-sm leading-relaxed text-[var(--color-text-tertiary)]">
+                  {dim.desc}
+                </p>
+              </GlassCard>
+            </Reveal>
           ))}
         </div>
       </section>
 
       {/* Types Grid Section */}
-      <section className="mx-auto max-w-6xl px-4 pb-24">
-        <div className="mb-12 text-center">
-          <GradientText as="h2" className="mb-3 text-2xl font-bold sm:text-3xl">
+      <section id="types" className={`${CONTAINER} scroll-mt-8 pb-24`}>
+        <Reveal className="mb-12 text-center">
+          <GradientText as="h2" className="mb-3 text-3xl font-bold sm:text-4xl">
             十六种人格类型
           </GradientText>
-          <p className="text-sm text-[var(--color-text-secondary)]">
+          <p className="text-base text-[var(--color-text-secondary)]">
             每一种都是独特的风景
           </p>
-        </div>
+        </Reveal>
 
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          {types.map((t) => (
-            <Link key={t.code} href={`/types/${t.code}`}>
-              <GlassCard variant="subtle" hover className="group p-4">
-                <TypeBadge type={t.code} size="sm" className="mb-2" />
-                <h3 className="mb-1 text-sm font-medium text-[var(--color-text-primary)] transition-colors group-hover:text-white">
-                  {t.name}
-                </h3>
-                <p className="line-clamp-2 text-xs leading-relaxed text-[var(--color-text-tertiary)]">
-                  {t.description.length > 80 ? `${t.description.slice(0, 80)}...` : t.description}
-                </p>
-              </GlassCard>
-            </Link>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {types.map((t, i) => (
+            <Reveal key={t.code} delay={(i % 4) * 80}>
+              <Link href={`/types/${t.code}`}>
+                <GlassCard variant="subtle" hover className="group h-full p-5">
+                  <TypeBadge type={t.code} size="sm" className="mb-2" />
+                  <h3 className="mb-1 text-base font-medium text-[var(--color-text-primary)] transition-colors group-hover:text-white">
+                    {t.name}
+                  </h3>
+                  <p className="line-clamp-2 text-sm leading-relaxed text-[var(--color-text-tertiary)]">
+                    {t.description.length > 80 ? `${t.description.slice(0, 80)}...` : t.description}
+                  </p>
+                </GlassCard>
+              </Link>
+            </Reveal>
           ))}
         </div>
       </section>
 
       {/* Explore Section */}
-      <section className="mx-auto max-w-4xl px-4 pb-32">
-        <div className="mb-12 text-center">
-          <GradientText as="h2" className="mb-3 text-2xl font-bold sm:text-3xl">
+      <section className={`${CONTAINER} pb-32`}>
+        <Reveal className="mb-12 text-center">
+          <GradientText as="h2" className="mb-3 text-3xl font-bold sm:text-4xl">
             探索更多
           </GradientText>
-          <p className="text-sm text-[var(--color-text-secondary)]">
+          <p className="text-base text-[var(--color-text-secondary)]">
             继续你的 MBTI 之旅
           </p>
-        </div>
+        </Reveal>
 
         <div className="grid gap-4 sm:grid-cols-3">
-          {EXPLORE_LINKS.map((item) => (
-            <Link key={item.href} href={item.href} className="group">
-              <GlassCard
-                variant="subtle"
-                hover
-                className="flex h-full flex-col items-center gap-3 p-8 text-center"
-              >
-                <div className="flex size-14 items-center justify-center rounded-2xl bg-white/[0.04] transition-transform duration-300 group-hover:scale-110">
-                  <item.icon className={`size-6 ${item.accent}`} />
-                </div>
-                <h3 className="text-lg font-semibold text-[var(--color-text-primary)] transition-colors group-hover:text-white">
-                  {item.title}
-                </h3>
-                <p className="text-sm leading-relaxed text-[var(--color-text-tertiary)]">
-                  {item.desc}
-                </p>
-              </GlassCard>
-            </Link>
+          {EXPLORE_LINKS.map((item, i) => (
+            <Reveal key={item.href} delay={i * 120}>
+              <Link href={item.href} className="group">
+                <GlassCard
+                  variant="subtle"
+                  hover
+                  className="flex h-full flex-col items-center gap-3 p-8 text-center"
+                >
+                  <div className="flex size-14 items-center justify-center rounded-2xl bg-white/[0.04] transition-transform duration-300 group-hover:scale-110">
+                    <item.icon className={`size-6 ${item.accent}`} />
+                  </div>
+                  <h3 className="text-base font-semibold text-[var(--color-text-primary)] transition-colors group-hover:text-white">
+                    {item.title}
+                  </h3>
+                  <p className="text-sm leading-relaxed text-[var(--color-text-tertiary)]">
+                    {item.desc}
+                  </p>
+                </GlassCard>
+              </Link>
+            </Reveal>
           ))}
         </div>
       </section>
 
       {/* Footer */}
       <footer className="border-t border-white/[0.04] py-8 text-center">
-        <div className="mb-2 flex items-center justify-center gap-4">
-          <Link href="/blog" className="text-xs text-[var(--color-text-tertiary)] transition-colors hover:text-[var(--color-text-secondary)]">
-            MBTI 博客
-          </Link>
-          <Link href="/compare" className="text-xs text-[var(--color-text-tertiary)] transition-colors hover:text-[var(--color-text-secondary)]">
-            对比类型
-          </Link>
-          <Link href="/stats" className="text-xs text-[var(--color-text-tertiary)] transition-colors hover:text-[var(--color-text-secondary)]">
-            统计数据
-          </Link>
-        </div>
         <p className="text-xs text-[var(--color-text-tertiary)]">
           MBTI 人格测试 · 开源免费 · 数据安全 · 无需注册
         </p>

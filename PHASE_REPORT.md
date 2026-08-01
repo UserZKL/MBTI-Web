@@ -168,3 +168,36 @@ ew PrismaLibSql({ url })（adapter 内部自建 client）→ 所有保存请求 
 | test | ✅ 82/82（5 files） |
 | build | ✅ 43 routes（严格 TS）+ Proxy(Middleware) |
 | E2E | ✅ 55/55（9 流程，新增 Flow 9: 首页三块导航/浮动按钮/本地历史回看/未登录 profile 本地记录/PersonAvatar） |
+---
+
+## V3 UX 优化报告（USER_FEEDBACK2.txt · 7 条反馈）
+
+### 批次0 — 动画基础设施
+- 新建 src/hooks/use-in-view.ts：IntersectionObserver 滚动进入视口检测（threshold 0.15、once、SSR 安全）
+- 新建 src/components/shared/reveal.tsx：Reveal 组件（up/left/right 方向、0-500ms 延迟、motion-reduce 降级）
+- globals.css：新增 3 个 bg-drift 漂移背景动画（28s/34s/40s 循环，紫/青/金光斑）+ .container-page 全局容器类
+
+### 批次1 — 首页（反馈 0/1/2/4/6）
+- 四维度 4 块：字体整体大一号（icon size-5、h3 text-base、desc text-sm、p-6）+ 滚动进入时从左往右依次浮出（Reveal left + stagger 120ms）
+- 16 人格块：h3 text-base、desc text-sm + 依次浮现（stagger 80ms）
+- 动态背景：2 个静态光斑 → 3 个 CSS 漂移光斑（月之暗面风格降级方案）
+- 「探索更多」3 框：容器与字号对齐 16 人格块
+- footer 删除小字导航行，仅保留版权行
+
+### 批次2 — 全站宽度统一（反馈 3/5）
+- 新增 .container-page：桌面端 max-width: min(70vw, 72rem)（约 70% 视口、封顶 1152px），小屏满宽
+- 应用：类型详情页（含返回按钮 → 首页 /#types 锚点 + 全字体大一号）、/types 16 人格区块、blog 列表/详情、compare、stats
+- 16 人格详情页全部字号大一号（desc text-base、列表 text-sm、chips text-sm、卡片 p-6）
+
+### 批次3 — 验证
+| Check | Result |
+|-------|--------|
+| typecheck | ✅ |
+| lint | ✅ 0 errors 0 warnings |
+| test | ✅ 82/82（5 files） |
+| build | ✅ 43 routes（严格 TS）+ Proxy(Middleware) |
+| E2E | ✅ 55/55（playwright 改为 workers=1 串行，消除 dev 并发编译导致的页面 reload 误报） |
+| Git | V3 commit |
+
+### 备注
+- E2E 在预热 dev server 上运行（Playwright 冷启动 dev server + 并发 worker 会导致 Next.js dev full reload，sessionStorage 残留触发恢复弹窗误报）

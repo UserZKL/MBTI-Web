@@ -48,7 +48,7 @@ export function StatsPage() {
         <div className="absolute bottom-0 left-0 h-[300px] w-[300px] rounded-full bg-[var(--color-brand-cyan)]/3 blur-[80px]" />
       </div>
 
-      <div className="mx-auto max-w-4xl px-4 pb-20">
+      <div className="container-page pb-20">
         <Link
           href="/"
           className="mb-8 mt-6 inline-flex items-center gap-1.5 text-xs text-[var(--color-text-tertiary)] transition-colors hover:text-white"

@@ -42,7 +42,7 @@ export default async function BlogDetailPage({ params }: Props) {
         <div className="absolute top-0 right-0 h-[400px] w-[400px] rounded-full bg-[var(--color-brand-purple)]/3 blur-[100px]" />
       </div>
 
-      <main className="mx-auto max-w-3xl px-4 py-12 sm:py-16">
+      <main className="container-page py-12 sm:py-16">
         <Link
           href="/blog"
           className="mb-6 inline-flex items-center gap-1.5 text-xs text-[var(--color-text-tertiary)] transition-colors hover:text-white"

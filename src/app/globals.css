@@ -222,6 +222,77 @@ body {
   box-shadow: 0 0 30px rgba(6, 182, 212, 0.12);
 }
 
+/* ====== Page container (content fills ~70% of viewport on desktop) ====== */
+.container-page {
+  width: 100%;
+  max-width: 72rem;
+  margin-inline: auto;
+  padding-inline: 1rem;
+}
+
+@media (min-width: 1024px) {
+  .container-page {
+    max-width: min(70vw, 72rem);
+  }
+}
+
+/* ====== Dynamic background drift ====== */
+@keyframes bg-drift-1 {
+  0%,
+  100% {
+    transform: translate(-20%, -10%) scale(1);
+  }
+  33% {
+    transform: translate(5%, 12%) scale(1.15);
+  }
+  66% {
+    transform: translate(-8%, 20%) scale(0.95);
+  }
+}
+
+@keyframes bg-drift-2 {
+  0%,
+  100% {
+    transform: translate(15%, 8%) scale(1.05);
+  }
+  40% {
+    transform: translate(-10%, -12%) scale(0.9);
+  }
+  70% {
+    transform: translate(6%, -4%) scale(1.2);
+  }
+}
+
+@keyframes bg-drift-3 {
+  0%,
+  100% {
+    transform: translate(0%, 15%) scale(1);
+  }
+  50% {
+    transform: translate(10%, -8%) scale(1.1);
+  }
+}
+
+.bg-drift-1 {
+  animation: bg-drift-1 28s ease-in-out infinite;
+}
+
+.bg-drift-2 {
+  animation: bg-drift-2 34s ease-in-out infinite;
+}
+
+.bg-drift-3 {
+  animation: bg-drift-3 40s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bg-drift-1,
+  .bg-drift-2,
+  .bg-drift-3 {
+    animation: none;
+  }
+}
+
 /* ====== Entrance animations ====== */
 @keyframes fade-up {
   from {
