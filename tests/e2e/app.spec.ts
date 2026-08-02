@@ -241,6 +241,58 @@ test.describe("Flow 9: V2 Homepage & Navigation", () => {
   })
 })
 
+test.describe("Flow 11: Floating Back Navigation", () => {
+  test("should return home from first test page via floating back button", async ({ page }) => {
+    await page.goto("/test")
+    await expect(page.getByRole("button", { name: "第 1 题 符合" })).toBeVisible()
+
+    await page.getByRole("button", { name: "返回首页" }).click()
+    await page.waitForURL((url) => url.pathname === "/")
+  })
+
+  test("should go back one test page via floating back button", async ({ page }) => {
+    await page.goto("/test")
+    await expect(page.getByRole("button", { name: "第 1 题 符合" })).toBeVisible()
+
+    for (let i = 1; i <= 12; i++) {
+      await page.getByRole("button", { name: `第 ${i} 题 符合` }).click({ force: true })
+    }
+    await page.getByRole("button", { name: "下一页" }).click({ force: true })
+    await expect(page.getByRole("button", { name: "第 13 题 符合" })).toBeVisible({ timeout: 10000 })
+
+    await page.getByRole("button", { name: "返回上一页" }).click()
+    await expect(page.getByRole("button", { name: "第 1 题 符合" })).toBeVisible()
+    await expect(page.getByRole("button", { name: "第 13 题 符合" })).toBeHidden()
+  })
+
+  test("should hide floating back button on result page", async ({ page }) => {
+    const data = Buffer.from(
+      JSON.stringify(Array.from({ length: 72 }, (_, i) => ({ questionId: i + 1, answer: "agree" })))
+    ).toString("base64")
+    await page.goto(`/result?data=${encodeURIComponent(data)}`)
+
+    await expect(page.getByRole("link", { name: "返回首页" })).toBeVisible()
+    await expect(page.getByRole("button", { name: "返回上一页" })).toBeHidden()
+  })
+})
+
+test.describe("Flow 12: Character Avatars", () => {
+  test("should show 16 character avatars on home types grid", async ({ page }) => {
+    await page.goto("/")
+    await expect(page.getByRole("img", { name: /人格形象/ })).toHaveCount(16)
+  })
+
+  test("should show 16 character avatars on all types page", async ({ page }) => {
+    await page.goto("/types")
+    await expect(page.getByRole("img", { name: /人格形象/ })).toHaveCount(16)
+  })
+
+  test("should show character avatar on type detail page", async ({ page }) => {
+    await page.goto("/types/intj")
+    await expect(page.getByRole("img", { name: /人格形象/ })).toBeVisible()
+  })
+})
+
 test.describe("Flow 5: Responsive Breakpoints", () => {
   for (const device of DEVICE_SIZES) {
     for (const pageInfo of CRITICAL_PAGES) {
@@ -307,6 +359,7 @@ test.describe("Flow 10: Save Page & AI Report Persistence", () => {
     ])
 
     expect(download.suggestedFilename()).toContain("mbti-result-")
+    await expect(page.getByRole("button", { name: "下载完成" })).toBeVisible({ timeout: 5000 })
     await download.saveAs("test-results/flow10.html")
     const stream = await download.createReadStream()
     const chunks: Buffer[] = []

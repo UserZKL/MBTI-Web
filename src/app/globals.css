@@ -308,6 +308,7 @@ body {
   }
 }
 
+/* ====== Character animations ====== */
 @keyframes person-breathe {
   0%,
   100% {
@@ -316,6 +317,169 @@ body {
   50% {
     transform: scale(1.03);
   }
+}
+
+@keyframes char-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+@keyframes char-sway {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  30% {
+    transform: rotate(1.6deg);
+  }
+  70% {
+    transform: rotate(-1.6deg);
+  }
+}
+
+@keyframes char-bounce {
+  0%,
+  100% {
+    transform: translateY(0) scale(1, 1);
+  }
+  30% {
+    transform: translateY(-7px) scale(0.98, 1.02);
+  }
+  55% {
+    transform: translateY(0) scale(1.03, 0.96);
+  }
+  70% {
+    transform: translateY(-3px) scale(0.99, 1.01);
+  }
+}
+
+@keyframes char-nod {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  40% {
+    transform: rotate(1.2deg);
+  }
+  60% {
+    transform: rotate(-0.6deg);
+  }
+}
+
+@keyframes char-tilt {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  40% {
+    transform: rotate(-2deg);
+  }
+}
+
+@keyframes char-wiggle {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(-2.4deg);
+  }
+  75% {
+    transform: rotate(2.4deg);
+  }
+}
+
+@keyframes char-blink {
+  0%,
+  45%,
+  53%,
+  100% {
+    transform: scaleY(1);
+  }
+  49% {
+    transform: scaleY(0.08);
+  }
+}
+
+@keyframes char-wave {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(-16deg);
+  }
+  55% {
+    transform: rotate(8deg);
+  }
+  80% {
+    transform: rotate(-8deg);
+  }
+}
+
+@keyframes char-halo-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.85;
+  }
+  50% {
+    transform: scale(1.045);
+    opacity: 1;
+  }
+}
+
+@keyframes prop-twinkle {
+  0%,
+  100% {
+    opacity: 0.3;
+    transform: scale(0.7);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.15);
+  }
+}
+
+@keyframes prop-glow {
+  0%,
+  100% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 0.95;
+  }
+}
+
+@keyframes prop-swing {
+  0%,
+  100% {
+    transform: rotate(-5deg);
+  }
+  50% {
+    transform: rotate(5deg);
+  }
+}
+
+.person-avatar {
+  display: inline-block;
+  line-height: 0;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.person-avatar:hover {
+  transform: scale(1.05);
+  animation: char-bounce 1.4s ease-in-out infinite !important;
+}
+
+.group:hover .person-avatar {
+  transform: scale(1.08);
+  animation: char-bounce 1.4s ease-in-out infinite !important;
 }
 
 .animate-fade-up {
@@ -345,6 +509,12 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .animate-fade-up {
     animation: none;
+  }
+
+  .person-avatar,
+  .person-avatar * {
+    animation: none !important;
+    transition: none !important;
   }
 }
 

@@ -2,6 +2,7 @@ import Link from "next/link"
 import { GradientText } from "@/components/shared/gradient-text"
 import { GlassCard } from "@/components/shared/glass-card"
 import { TypeBadge } from "@/components/shared/type-badge"
+import { PersonAvatar } from "@/components/shared/person-avatar"
 import { getAllPersonalityTypes } from "@/lib/mbti-utils"
 
 export function AllTypesPage() {
@@ -28,6 +29,9 @@ export function AllTypesPage() {
           {types.map((t) => (
             <Link key={t.code} href={`/types/${t.code}`}>
               <GlassCard variant="subtle" hover className="group p-5">
+                <div className="mb-3 flex justify-center">
+                  <PersonAvatar type={t.code} size={64} />
+                </div>
                 <TypeBadge type={t.code} size="md" className="mb-3" />
                 <h2 className="mb-1 text-base font-semibold text-[var(--color-text-primary)] transition-colors group-hover:text-white">
                   {t.name}

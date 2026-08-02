@@ -5,6 +5,7 @@ import { GlassCard } from "@/components/shared/glass-card"
 import { TypeBadge } from "@/components/shared/type-badge"
 import { LastResultButton } from "@/components/shared/last-result-button"
 import { Reveal } from "@/components/shared/reveal"
+import { PersonAvatar } from "@/components/shared/person-avatar"
 import { getAllPersonalityTypes } from "@/lib/mbti-utils"
 import { Hash, TrendingUp, Brain, Lightbulb, BookOpen, Scale, BarChart3 } from "lucide-react"
 
@@ -176,6 +177,9 @@ export function LandingPage() {
             <Reveal key={t.code} delay={(i % 4) * 80}>
               <Link href={`/types/${t.code}`}>
                 <GlassCard variant="subtle" hover className="group h-full p-5">
+                  <div className="mb-3 flex justify-center">
+                    <PersonAvatar type={t.code} size={64} />
+                  </div>
                   <TypeBadge type={t.code} size="sm" className="mb-2" />
                   <h3 className="mb-1 text-base font-medium text-[var(--color-text-primary)] transition-colors group-hover:text-white">
                     {t.name}

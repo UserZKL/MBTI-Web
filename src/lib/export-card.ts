@@ -1,3 +1,5 @@
+import { avatarSrc } from "@/lib/person-svg"
+
 export interface ExportCardData {
   typeCode: string
   typeName: string
@@ -8,7 +10,7 @@ export interface ExportCardData {
 }
 
 const CARD_WIDTH = 800
-const CARD_HEIGHT = 1000
+const CARD_HEIGHT = 1040
 
 const COLORS = {
   bgTop: "#0a0a12",
@@ -52,6 +54,22 @@ async function ensureFonts(ctx: CanvasRenderingContext2D) {
     // fonts not available, fall back to system
   }
   ctx.font = '700 64px "Noto Sans SC", sans-serif'
+}
+
+async function drawCharacter(
+  ctx: CanvasRenderingContext2D,
+  typeCode: string,
+  x: number,
+  y: number,
+  size: number
+) {
+  const img = new Image()
+  await new Promise<void>((resolve, reject) => {
+    img.onload = () => resolve()
+    img.onerror = () => reject(new Error("avatar image failed to load"))
+    img.src = avatarSrc(typeCode)
+  })
+  ctx.drawImage(img, x, y, size, size)
 }
 
 export async function drawResultCard(data: ExportCardData): Promise<string> {
@@ -105,33 +123,36 @@ export async function drawResultCard(data: ExportCardData): Promise<string> {
   ctx.font = '700 32px "Noto Sans SC", sans-serif'
   ctx.fillText(chipText, CARD_WIDTH / 2, chipY + 43)
 
+  // Character
+  await drawCharacter(ctx, data.typeCode, 275, 230, 250)
+
   // Type name
   ctx.fillStyle = COLORS.white
   ctx.font = '700 64px "Noto Sans SC", sans-serif'
-  ctx.fillText(data.typeName, CARD_WIDTH / 2, 320)
+  ctx.fillText(data.typeName, CARD_WIDTH / 2, 590)
 
   // Divider line
   ctx.strokeStyle = "rgba(212,168,83,0.5)"
   ctx.lineWidth = 2
   ctx.beginPath()
-  ctx.moveTo(220, 370)
-  ctx.lineTo(580, 370)
+  ctx.moveTo(220, 635)
+  ctx.lineTo(580, 635)
   ctx.stroke()
 
   // Description (wrapped)
   ctx.fillStyle = COLORS.secondary
   ctx.font = '400 26px "Noto Sans SC", sans-serif'
   const descLines = wrapText(ctx, data.description, 620)
-  let descY = 430
-  for (const line of descLines.slice(0, 5)) {
+  let descY = 680
+  for (const line of descLines.slice(0, 3)) {
     ctx.fillText(line, CARD_WIDTH / 2, descY)
-    descY += 40
+    descY += 38
   }
 
   // Dimensions bars
   if (data.dimensions && data.dimensions.length > 0) {
-    let y = descY + 30
-    for (const dim of data.dimensions.slice(0, 4)) {
+    let y = 790
+    for (const dim of data.dimensions.slice(0, 3)) {
       ctx.font = '500 24px "Noto Sans SC", sans-serif'
       ctx.fillStyle = COLORS.secondary
       ctx.textAlign = "left"
@@ -162,13 +183,13 @@ export async function drawResultCard(data: ExportCardData): Promise<string> {
       ctx.fillText(`${dim.leftPct}%`, barX + 40, y + 10)
       ctx.fillText(`${dim.rightPct}%`, barX + barW - 40, y + 10)
 
-      y += 90
+      y += 52
     }
   }
 
   // Strengths chips
   if (data.strengths && data.strengths.length > 0) {
-    let y = CARD_HEIGHT - 320
+    let y = 950
     ctx.textAlign = "left"
     ctx.fillStyle = COLORS.secondary
     ctx.font = '500 24px "Noto Sans SC", sans-serif'
@@ -199,7 +220,7 @@ export async function drawResultCard(data: ExportCardData): Promise<string> {
     ctx.fillStyle = COLORS.tertiary
     ctx.font = '400 22px "Noto Sans SC", sans-serif'
     ctx.textAlign = "center"
-    ctx.fillText(data.footer, CARD_WIDTH / 2, CARD_HEIGHT - 70)
+    ctx.fillText(data.footer, CARD_WIDTH / 2, CARD_HEIGHT - 30)
   }
 
   return canvas.toDataURL("image/png")

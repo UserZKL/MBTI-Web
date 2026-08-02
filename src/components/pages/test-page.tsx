@@ -1,12 +1,13 @@
 "use client"
 
-import { useRef, useState } from "react"
+import { useRef, useState, useEffect } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { ChevronLeft, ChevronRight, Home } from "lucide-react"
 import { GlassCard } from "@/components/shared/glass-card"
 import { ProgressBar } from "@/components/shared/progress-bar"
 import { LastResultButton } from "@/components/shared/last-result-button"
+import { useTestNav } from "@/components/shared/test-nav-context"
 import { getQuestions, type Answer } from "@/lib/mbti-utils"
 
 const STORAGE_KEY = "mbti-test-state"
@@ -56,6 +57,7 @@ function clearState() {
 
 export function TestPage() {
   const router = useRouter()
+  const { registerBackHandler } = useTestNav()
   const questions = getQuestions()
   const [currentPage, setCurrentPage] = useState(0)
   const [answers, setAnswers] = useState<Answer[]>([])
@@ -134,6 +136,21 @@ export function TestPage() {
     saveState(nextPage, answers)
     window.scrollTo({ top: 0, behavior: "smooth" })
   }
+
+  useEffect(() => {
+    registerBackHandler(
+      () => {
+        if (currentPage === 0) {
+          router.push("/")
+        } else {
+          handleGoPrev()
+        }
+      },
+      currentPage === 0 ? "返回首页" : "返回上一页"
+    )
+    return () => registerBackHandler(null)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [registerBackHandler, router, currentPage])
 
   return (
     <div className="relative flex min-h-screen flex-col items-center overflow-x-clip px-4">

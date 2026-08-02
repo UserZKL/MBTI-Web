@@ -17,7 +17,7 @@ import { writeLocalHistory, readLocalHistory, updateLocalHistoryReport } from "@
 import { buildPageHtml, downloadPageHtml } from "@/lib/save-page"
 import {
   FileDown, RefreshCw, Users, Briefcase, Heart, TrendingUp,
-  Sparkles, Loader2, ImageDown
+  Sparkles, Loader2, ImageDown, CircleCheck
 } from "lucide-react"
 
 export function ResultPage() {
@@ -161,6 +161,15 @@ export function ResultPage() {
 
   const [downloadState, setDownloadState] = useState<"idle" | "loading" | "done" | "error">("idle")
   const [savePageState, setSavePageState] = useState<"idle" | "loading" | "done" | "error">("idle")
+  const savePageTimerRef = useRef<number | null>(null)
+  const downloadTimerRef = useRef<number | null>(null)
+
+  useEffect(() => {
+    return () => {
+      if (savePageTimerRef.current !== null) window.clearTimeout(savePageTimerRef.current)
+      if (downloadTimerRef.current !== null) window.clearTimeout(downloadTimerRef.current)
+    }
+  }, [])
 
   const handleSavePage = async () => {
     if (!result) return
@@ -170,6 +179,8 @@ export function ResultPage() {
       const date = new Date().toISOString().slice(0, 10)
       downloadPageHtml(html, `mbti-result-${result.type}-${date}.html`)
       setSavePageState("done")
+      if (savePageTimerRef.current !== null) window.clearTimeout(savePageTimerRef.current)
+      savePageTimerRef.current = window.setTimeout(() => setSavePageState("idle"), 2500)
     } catch {
       setSavePageState("error")
     }
@@ -194,6 +205,8 @@ export function ResultPage() {
       })
       downloadDataUrl(url, `mbti-result-${result.type}.png`)
       setDownloadState("done")
+      if (downloadTimerRef.current !== null) window.clearTimeout(downloadTimerRef.current)
+      downloadTimerRef.current = window.setTimeout(() => setDownloadState("idle"), 2500)
     } catch {
       setDownloadState("error")
     }
@@ -460,10 +473,12 @@ export function ResultPage() {
           >
             {savePageState === "loading" ? (
               <Loader2 className="size-5 animate-spin" aria-hidden="true" />
+            ) : savePageState === "done" ? (
+              <CircleCheck className="size-5" aria-hidden="true" />
             ) : (
               <FileDown className="size-5" aria-hidden="true" />
             )}
-            {savePageState === "loading" ? "保存中..." : "保存页面"}
+            {savePageState === "loading" ? "保存中..." : savePageState === "done" ? "下载完成" : "保存页面"}
           </GradientButton>
           <GradientButton
             variant="outline"
@@ -473,10 +488,12 @@ export function ResultPage() {
           >
             {downloadState === "loading" ? (
               <Loader2 className="size-5 animate-spin" aria-hidden="true" />
+            ) : downloadState === "done" ? (
+              <CircleCheck className="size-5" aria-hidden="true" />
             ) : (
               <ImageDown className="size-5" aria-hidden="true" />
             )}
-            {downloadState === "loading" ? "生成中..." : "下载图片"}
+            {downloadState === "loading" ? "生成中..." : downloadState === "done" ? "下载完成" : "下载图片"}
           </GradientButton>
           {downloadState === "error" && (
             <p className="w-full text-center text-sm text-[var(--color-error)]">
