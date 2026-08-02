@@ -15,6 +15,8 @@
 - **匿名历史** — 不登录也能在本地保存测试记录（localStorage，最多 20 条），随时回看
 - **类型对比 / 全站统计** — 任意两种人格并排对比；测试分布、维度占比统计
 - **MBTI 知识博客** — 12 篇中文深度文章
+- **静态页面保存** — 结果页一键导出完整静态 HTML（DOM + 样式内联），离线可看、可分享
+- **AI 报告持久化** — 生成的 AI 报告云端保存，登录后随时回看历史结果
 
 ## 技术栈与实现方式
 
@@ -26,7 +28,7 @@
 | 认证 | NextAuth v5 + Resend | 邮箱 6 位验证码登录（magic-link 机制改造），JWT 会话，`src/proxy.ts` 保护个人中心 API |
 | AI 报告 | DeepSeek API（服务端调用） | `POST /api/report/generate` 在服务器端请求 DeepSeek，结果缓存 24 小时、IP 限流 10 次/分 |
 | 校验 | Zod 4 | 所有 API 入参服务端校验 |
-| 测试 | Vitest 86 项单测 + Playwright 55 项 E2E | 覆盖评分算法、API、AI 缓存限流、完整用户流程 |
+| 测试 | Vitest 192 项单测 + Playwright 63 项 E2E | 覆盖评分算法、API、AI 缓存限流、完整用户流程 |
 
 **核心算法**（`src/lib/mbti-utils.ts`）：72 题按 E/I、S/N、T/F、J/P 四维度加权计分（权重 1-3），支持反向题计分；百分比 = 维度对得分占比；置信度 = 四维度最小支配比；边缘维度（占比 < 55%）在结果页提示。
 
@@ -121,7 +123,7 @@ npm run dev
 
 ```bash
 npm run typecheck   # 类型检查
-npm test            # 单元测试（86 项）
+npm test            # 单元测试（192 项）
 npm run build       # 生产构建
 ```
 
